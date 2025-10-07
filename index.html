@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statistics - Gaia Diodati</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Rajdhani', sans-serif;
+      color: #fff5cc;
+      background: #050505;
+      overflow-x: hidden;
+    }
+
+    canvas#bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 5rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #e6b800;
+      position: relative;
+      text-shadow: 0 0 8px #ffcc00, 0 0 16px #ffaa00, 2px 2px 35px rgba(255,200,0,0.8);
+      animation: glowPulse 4s ease-in-out infinite, glitch 2s infinite;
+    }
+
+    h1::before, h1::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      color: #ffaa00;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    h1::before {
+      left: 2px;
+      text-shadow: -2px 0 #ff33cc;
+      animation: glitchShift 2s infinite linear alternate-reverse;
+    }
+
+    h1::after {
+      left: -2px;
+      text-shadow: 2px 0 #00ffcc;
+      animation: glitchShift 3s infinite linear alternate;
+    }
+
+    @keyframes glitchShift {
+      0% { clip-path: inset(0 0 90% 0); }
+      20% { clip-path: inset(10% 0 70% 0); }
+      40% { clip-path: inset(40% 0 30% 0); }
+      60% { clip-path: inset(60% 0 10% 0); }
+      80% { clip-path: inset(80% 0 0 0); }
+      100% { clip-path: inset(0 0 100% 0); }
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { text-shadow: 0 0 8px #ffcc00, 0 0 20px #ffaa00, 0 0 40px #ffcc33; }
+      50% { text-shadow: 0 0 15px #ffee88, 0 0 35px #ffaa00, 0 0 60px #ffd966; }
+    }
+
+    @keyframes glitch {
+      0%, 100% { transform: none; }
+      92% { transform: translate(-1px, 1px) skew(0.3deg); }
+      94% { transform: translate(1px, -1px) skew(-0.3deg); }
+      96% { transform: translate(-2px, 1px) skew(0.5deg); }
+      98% { transform: translate(2px, -1px) skew(-0.5deg); }
+    }
+
+    .posts {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px;
+      gap: 30px;
+      background: rgba(20, 20, 20, 0.8);
+    }
+
+    .post-card {
+      width: 80%;
+      max-width: 700px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 200, 0, 0.3);
+      border-radius: 12px;
+      padding: 25px;
+      text-align: left;
+      backdrop-filter: blur(6px);
+      transition: all 0.3s ease;
+    }
+
+    .post-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 25px rgba(255, 200, 0, 0.3);
+    }
+
+    .post-card h2 {
+      font-family: 'Orbitron', sans-serif;
+      color: #ffaa00;
+      margin-bottom: 10px;
+    }
+
+    .post-card p {
+      color: #fff3cc;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .post-card a {
+      display: inline-block;
+      margin-top: 10px;
+      color: #ffaa00;
+      text-decoration: none;
+      border: 1px solid #ffaa00;
+      padding: 8px 16px;
+      border-radius: 999px;
+      transition: all 0.3s ease;
+    }
+
+    .post-card a:hover {
+      background: #ffaa00;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+
+  <div class="hero">
+    <h1 data-text="Statistics">Statistics</h1>
+    <h2>Data. Science. Security.</h2>
+    <p class="subtitle">Gaia Diodati – Matricola 2279030<br>Corso Magistrale in Cyber Security – Sapienza</p>
+  </div>
+
+  <section class="posts">
+    <div class="post-card">
+      <h2>Homework 1</h2>
+      <p>Analisi di un dataset campione per esplorare le distribuzioni statistiche e identificare relazioni tra variabili.</p>
+      <a href="homework1.html">Leggi di più →</a>
+    </div>
+    
+  </section>
+
+  <script>
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const points = [];
+    const numPoints = 120;
+
+    for (let i = 0; i < numPoints; i++) {
+      points.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: (Math.random() - 0.5) * 0.6
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < points.length; i++) {
+        const p1 = points[i];
+
+        for (let j = i + 1; j < points.length; j++) {
+          const p2 = points[j];
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 130) {
+            ctx.strokeStyle = `rgba(255, 200, 0, ${(1 - dist / 130) * 0.15})`;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+
+        p1.x += p1.vx;
+        p1.y += p1.vy;
+
+        if (p1.x < 0 || p1.x > canvas.width) p1.vx *= -1;
+        if (p1.y < 0 || p1.y > canvas.height) p1.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p1.x, p1.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffcc00';
+        ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  </script>
+</body>
+</html>
