@@ -24,24 +24,27 @@
       z-index: -1;
     }
 
+    /* ====== HERO SECTION ====== */
     .hero {
-      height: 100vh;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       text-align: center;
+      padding: 0 4vw;
     }
 
     h1 {
       font-family: 'Orbitron', sans-serif;
-      font-size: 5rem;
-      letter-spacing: 4px;
+      font-size: clamp(2.2rem, 8vw, 5rem); /* dinamico */
+      letter-spacing: 3px;
       text-transform: uppercase;
       color: #e6b800;
       position: relative;
       text-shadow: 0 0 8px #ffcc00, 0 0 16px #ffaa00, 2px 2px 35px rgba(255,200,0,0.8);
       animation: glowPulse 4s ease-in-out infinite, glitch 2s infinite;
+      margin: 0 0 12px;
     }
 
     h1::before, h1::after {
@@ -67,6 +70,19 @@
       animation: glitchShift 3s infinite linear alternate;
     }
 
+    h2 {
+      font-size: clamp(1.2rem, 4vw, 2rem);
+      color: #ffd966;
+      margin: 6px 0;
+    }
+
+    .subtitle {
+      font-size: clamp(0.9rem, 3vw, 1rem);
+      color: #fff3cc;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+
     @keyframes glitchShift {
       0% { clip-path: inset(0 0 90% 0); }
       20% { clip-path: inset(10% 0 70% 0); }
@@ -89,22 +105,23 @@
       98% { transform: translate(2px, -1px) skew(-0.5deg); }
     }
 
+    /* ====== POSTS SECTION ====== */
     .posts {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 60px 20px;
-      gap: 30px;
+      padding: 50px 5vw 70px;
+      gap: 25px;
       background: rgba(20, 20, 20, 0.8);
     }
 
     .post-card {
-      width: 80%;
+      width: 90%;
       max-width: 700px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 200, 0, 0.3);
       border-radius: 12px;
-      padding: 25px;
+      padding: 22px;
       text-align: left;
       backdrop-filter: blur(6px);
       transition: all 0.3s ease;
@@ -119,28 +136,42 @@
       font-family: 'Orbitron', sans-serif;
       color: #ffaa00;
       margin-bottom: 10px;
+      font-size: clamp(1.2rem, 4vw, 1.6rem);
     }
 
     .post-card p {
       color: #fff3cc;
-      font-size: 1rem;
+      font-size: clamp(0.9rem, 2.8vw, 1rem);
       line-height: 1.6;
     }
 
     .post-card a {
       display: inline-block;
-      margin-top: 10px;
+      margin-top: 12px;
       color: #ffaa00;
       text-decoration: none;
       border: 1px solid #ffaa00;
-      padding: 8px 16px;
+      padding: 7px 14px;
       border-radius: 999px;
+      font-size: clamp(0.85rem, 3vw, 1rem);
       transition: all 0.3s ease;
     }
 
     .post-card a:hover {
       background: #ffaa00;
       color: #000;
+    }
+
+    /* ====== MEDIA TWEAKS ====== */
+    @media (max-height: 650px) {
+      .hero { min-height: 90vh; padding-top: 40px; }
+      h1 { font-size: clamp(2rem, 7vw, 4rem); }
+    }
+
+    @media (max-width: 480px) {
+      .posts { padding: 40px 15px 60px; gap: 20px; }
+      .post-card { width: 95%; padding: 18px; }
+      h2 { font-size: 1rem; }
     }
   </style>
 </head>
@@ -159,7 +190,6 @@
       <p>Analisi di un dataset campione per esplorare le distribuzioni statistiche e identificare relazioni tra variabili.</p>
       <a href="homework1.html">Leggi di più →</a>
     </div>
-    
   </section>
 
   <script>
@@ -174,7 +204,7 @@
     resizeCanvas();
 
     const points = [];
-    const numPoints = 120;
+    const numPoints = 100;
 
     for (let i = 0; i < numPoints; i++) {
       points.push({
@@ -187,10 +217,8 @@
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       for (let i = 0; i < points.length; i++) {
         const p1 = points[i];
-
         for (let j = i + 1; j < points.length; j++) {
           const p2 = points[j];
           const dx = p1.x - p2.x;
@@ -207,7 +235,6 @@
 
         p1.x += p1.vx;
         p1.y += p1.vy;
-
         if (p1.x < 0 || p1.x > canvas.width) p1.vx *= -1;
         if (p1.y < 0 || p1.y > canvas.height) p1.vy *= -1;
 
