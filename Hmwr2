@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homework 2 – Caesar Cipher</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Rajdhani', sans-serif;
+      color: #fff5cc;
+      background: #050505;
+      overflow-x: hidden;
+    }
+
+    canvas#bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .card {
+      width: 85%;
+      max-width: 750px;
+      margin: 60px auto;
+      padding: 35px 25px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 200, 0, 0.3);
+      box-shadow: 0 0 25px rgba(255, 200, 0, 0.15);
+      backdrop-filter: blur(6px);
+    }
+
+    h1, h2 {
+      font-family: 'Orbitron', sans-serif;
+      color: #ffcc33;
+      text-shadow: 0 0 8px #ffaa00;
+    }
+
+    p, li {
+      color: #fff3cc;
+      line-height: 1.6;
+      font-size: 1.05rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      color: #fff2cc;
+    }
+
+    th, td {
+      border: 1px solid rgba(255, 200, 0, 0.4);
+      padding: 8px;
+      text-align: center;
+    }
+
+    #uploadBox {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input, button, select {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,200,0,0.4);
+      color: #ffd966;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      margin-top: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover, select:hover { background: rgba(255,200,0,0.15); }
+
+    #excerptDisplay {
+      margin-top: 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 20px;
+      display: none;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-line;
+    }
+
+    #cryptoOutput {
+      margin-top: 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 20px;
+      display: none;
+      transition: all 0.4s ease;
+      text-shadow: 0 0 6px rgba(255,200,0,0.6);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+
+  <div class="card">
+    <h1>🧩 What is a Dataset?</h1>
+    <p>A <span style="color:#ffd966">dataset</span> is a collection of related data, usually organized in a table with rows and columns.</p>
+    <p>Each row represents an observation or record (e.g., one user, one device, one log event).</p>
+    <p>Each column represents a variable or feature (e.g., IP address, login time, response code).</p>
+    <p><b>👉 In short:</b> A dataset is like a structured spreadsheet that stores information you can analyze.</p>
+  </div>
+
+  <div class="card">
+    <h1>📊 What is a Distribution?</h1>
+    <p>A <span style="color:#ffd966">distribution</span> shows how often each value or event appears in a dataset.</p>
+    <p>In cybersecurity, distributions can reveal patterns — for instance, if most logins happen around 9 AM but suddenly there’s a spike at midnight, that anomaly might suggest an intrusion attempt.</p>
+    <p>Distributions help us <b>detect unusual behavior</b> and <b>quantify probability</b> — both crucial in data-driven defense.</p>
+  </div>
+
+  <div class="card">
+    <h1>Cybersecurity Login Dataset</h1>
+    <table>
+      <tr><th>User_ID</th><th>Login_Time</th><th>Failed_Attempts</th><th>Device</th><th>Location</th></tr>
+      <tr><td>U001</td><td>09:10</td><td>1</td><td>Windows</td><td>Italy</td></tr>
+      <tr><td>U002</td><td>23:58</td><td>4</td><td>Linux</td><td>Russia</td></tr>
+      <tr><td>U003</td><td>10:05</td><td>0</td><td>MacOS</td><td>Italy</td></tr>
+      <tr><td>U004</td><td>02:45</td><td>5</td><td>Android</td><td>China</td></tr>
+      <tr><td>U005</td><td>11:25</td><td>2</td><td>Windows</td><td>USA</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h1>SQL Table Creation</h1>
+    <pre>CREATE TABLE LoginEvents (
+  User_ID TEXT,
+  Login_Time TEXT,
+  Failed_Attempts INTEGER,
+  Device TEXT,
+  Location TEXT
+);
+
+INSERT INTO LoginEvents VALUES
+('U001', '09:10', 1, 'Windows', 'Italy'),
+('U002', '23:58', 4, 'Linux', 'Russia'),
+('U003', '10:05', 0, 'MacOS', 'Italy'),
+('U004', '02:45', 5, 'Android', 'China'),
+('U005', '11:25', 2, 'Windows', 'USA');</pre>
+  </div>
+
+  <div class="card">
+    <h1>📄 Upload or Choose a Text</h1>
+    <p>Upload any file (PDF, DOCX, TXT) or select one of our sample texts below to analyze letter frequencies.</p>
+    <div id="uploadBox">
+      <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx">
+      <span style="color:#ffd966">or</span>
+      <select id="textSelect">
+        <option value="">Select a text...</option>
+        <option value="harry">Excerpt from <i>Harry Potter</i></option>
+        <option value="pinocchio">Excerpt from <i>Pinocchio</i></option>
+        <option value="pride">Excerpt from <i>Pride and Prejudice</i></option>
+        <option value="pillars">Excerpt from <i>The Pillars of the Earth</i></option>
+      </select>
+    </div>
+    <div id="excerptDisplay"></div>
+    <button id="analyzeBtn">Analyze Distribution</button>
+    <canvas id="freqChart" style="display:none;max-height:400px;margin-top:30px"></canvas>
+  </div>
+
+  <div class="card">
+    <h1>🔐 Caesar Cipher</h1>
+    <p>The <b>Caesar Cipher</b> is one of the oldest encryption techniques, shifting each letter in the text by a fixed number of positions in the alphabet. Despite its simplicity, it forms the basis of many modern encryption concepts.</p>
+    <label>Shift value:</label>
+    <input type="number" id="shiftValue" value="3" min="1" max="25">
+    <div style="margin-top:10px;display:flex;gap:10px;justify-content:center">
+      <button id="encryptBtn">Encrypt Text</button>
+      <button id="decryptBtn">Decrypt Text</button>
+    </div>
+    <div id="cryptoOutput"></div>
+  </div>
+
+  <script>
+    const excerpts = {
+      harry: `Harry had never even imagined such a strange and splendid place. It was lit by thousands and thousands of candles which were floating in mid-air over four long tables, where the rest of the students were sitting. These tables were laid with glittering golden plates and goblets. At the top of the Hall was another long table where the teachers were sitting.`,
+      pinocchio: `As soon as he entered, Geppetto took up his tools and started to carve and construct his puppet. “What shall I call him?” he wondered. “I’ll call him Pinocchio. That’ll bring him luck.”`,
+      pride: `“You are dancing with the only handsome girl in the room,” said Mr. Darcy, looking at the eldest Miss Bennet. “Oh! She is the most beautiful creature I ever beheld!”`,
+      pillars: `In a broad valley, at the foot of a sloping hillside, beside a clear bubbling stream, Tom was building a house. The walls were already three feet high and rising fast.`
+    };
+
+    const textSelect = document.getElementById('textSelect');
+    const excerptDisplay = document.getElementById('excerptDisplay');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    let selectedText = '';
+
+    textSelect.addEventListener('change', () => {
+      const selected = textSelect.value;
+      if (selected && excerpts[selected]) {
+        excerptDisplay.style.display = 'block';
+        excerptDisplay.textContent = excerpts[selected];
+        selectedText = excerpts[selected];
+        analyzeBtn.disabled = false;
+      } else {
+        excerptDisplay.style.display = 'none';
+        excerptDisplay.textContent = '';
+        selectedText = '';
+        analyzeBtn.disabled = true;
+      }
+    });
+
+    analyzeBtn.addEventListener('click', () => {
+      if (!selectedText) return;
+      const freq = {};
+      selectedText.replace(/[^a-zA-Z]/g, '').toUpperCase().split('').forEach(l => {
+        freq[l] = (freq[l] || 0) + 1;
+      });
+      const labels = Object.keys(freq);
+      const data = Object.values(freq);
+      const ctxChart = document.getElementById('freqChart').getContext('2d');
+      document.getElementById('freqChart').style.display = 'block';
+      new Chart(ctxChart, {
+        type: 'bar',
+        data: { labels: labels, datasets: [{ label: 'Letter Frequency', data: data, backgroundColor: 'rgba(255, 204, 51, 0.7)', borderColor: '#ffaa00', borderWidth: 1 }] },
+        options: { animation: { duration: 2000, easing: 'easeOutBounce' }, scales: { y: { beginAtZero: true } } }
+      });
+    });
+
+    const canvasBG = document.getElementById('bg');
+    const ctx = canvasBG.getContext('2d');
+    function resizeCanvas(){canvasBG.width=window.innerWidth;canvasBG.height=window.innerHeight;}
+    window.addEventListener('resize',resizeCanvas);
+    resizeCanvas();
+    const points=[];
+    for(let i=0;i<120;i++){
+      points.push({x:Math.random()*canvasBG.width,y:Math.random()*canvasBG.height,vx:(Math.random()-0.5)*0.4,vy:(Math.random()-0.5)*0.4});
+    }
+    function drawBG(){
+      ctx.clearRect(0,0,canvasBG.width,canvasBG.height);
+      for(let i=0;i<points.length;i++){
+        const p1=points[i];
+        for(let j=i+1;j<points.length;j++){
+          const p2=points[j];
+          const dx=p1.x-p2.x,dy=p1.y-p2.y,dist=Math.hypot(dx,dy);
+          if(dist<120){
+            ctx.strokeStyle=`rgba(255,200,0,${(1-dist/120)*0.08})`;
+            ctx.beginPath();
+            ctx.moveTo(p1.x,p1.y);
+            ctx.lineTo(p2.x,p2.y);
+            ctx.stroke();
+          }
+        }
+        p1.x+=p1.vx;p1.y+=p1.vy;
+        if(p1.x<0||p1.x>canvasBG.width)p1.vx*=-1;
+        if(p1.y<0||p1.y>canvasBG.height)p1.vy*=-1;
+        ctx.beginPath();
+        ctx.arc(p1.x,p1.y,2,0,Math.PI*2);
+        ctx.fillStyle='#ffcc00';
+        ctx.fill();
+      }
+      requestAnimationFrame(drawBG);
+    }
+    drawBG();
+  </script>
+</body>
+</html>
