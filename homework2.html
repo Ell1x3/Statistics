@@ -155,6 +155,19 @@ INSERT INTO LoginEvents VALUES
   </div>
 
   <div class="card">
+    <h1>📊 Bivariate Distribution</h1>
+    <p>A <span style="color:#ffd966">bivariate distribution</span> is a probability distribution that shows the relationship between two variables. It illustrates how the values of two variables change together. In this case, we analyze the <b>Device Type</b> and <b>Failed Login Attempts</b>.</p>
+    <p>This kind of distribution helps identify correlations and patterns, like whether certain devices experience more failed login attempts than others.</p>
+    <table>
+      <tr><th>Device</th><th>0-2 Attempts</th><th>3-5 Attempts</th><th>6+ Attempts</th></tr>
+      <tr><td>Windows</td><td>1</td><td>1</td><td>0</td></tr>
+      <tr><td>Linux</td><td>0</td><td>1</td><td>0</td></tr>
+      <tr><td>MacOS</td><td>1</td><td>0</td><td>0</td></tr>
+      <tr><td>Android</td><td>0</td><td>1</td><td>0</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
     <h1>📄 Upload or Choose a Text</h1>
     <p>Upload any file (PDF, DOCX, TXT) or select one of our sample texts below to analyze letter frequencies.</p>
     <div id="uploadBox">
@@ -169,7 +182,7 @@ INSERT INTO LoginEvents VALUES
       </select>
     </div>
     <div id="excerptDisplay"></div>
-    <button id="analyzeBtn">Analyze Distribution</button>
+    <button id="analyzeBtn" disabled>Analyze Distribution</button>
     <canvas id="freqChart" style="display:none;max-height:400px;margin-top:30px"></canvas>
   </div>
 
@@ -180,91 +193,154 @@ INSERT INTO LoginEvents VALUES
     <input type="number" id="shiftValue" value="3" min="1" max="25">
     <div style="margin-top:10px;display:flex;gap:10px;justify-content:center">
       <button id="encryptBtn">Encrypt Text</button>
-      <button id="decryptBtn">Decrypt Text</button>
+      <button id="decryptBtn" style="display:none;">Decrypt Text</button>
+      <button id="showDistBtn" style="display:none;">Show Letter Distribution</button>
     </div>
     <div id="cryptoOutput"></div>
+    <canvas id="cryptoFreqChart" style="display:none;max-height:400px;margin-top:30px"></canvas>
+  </div>
+
+  <!-- New card for decryption logic -->
+  <div class="card">
+    <h1>🔐 Decryption Logic</h1>
+    <p>The <b>Caesar Cipher</b> works by shifting the letters of the alphabet by a fixed number. To decrypt the message, we simply reverse the shift. For example, if the text was encrypted with a shift of 3, we would shift each letter 3 positions backward to recover the original text.</p>
+    <button id="decryptBtnAfterDist" style="display:none;">Decrypt Text</button>
   </div>
 
   <script>
     const excerpts = {
-      harry: `Harry had never even imagined such a strange and splendid place. It was lit by thousands and thousands of candles which were floating in mid-air over four long tables, where the rest of the students were sitting. These tables were laid with glittering golden plates and goblets. At the top of the Hall was another long table where the teachers were sitting.`,
-      pinocchio: `As soon as he entered, Geppetto took up his tools and started to carve and construct his puppet. “What shall I call him?” he wondered. “I’ll call him Pinocchio. That’ll bring him luck.”`,
-      pride: `“You are dancing with the only handsome girl in the room,” said Mr. Darcy, looking at the eldest Miss Bennet. “Oh! She is the most beautiful creature I ever beheld!”`,
-      pillars: `In a broad valley, at the foot of a sloping hillside, beside a clear bubbling stream, Tom was building a house. The walls were already three feet high and rising fast.`
+        harry: `Harry had never even imagined such a strange and splendid place. It was lit by thousands and thousands of candles which were floating in mid-air over four long tables, where the rest of the students were sitting. These tables were laid with glittering golden plates and goblets. At the top of the Hall was another long table where the teachers were sitting.`,
+        pinocchio: `As soon as he entered, Geppetto took up his tools and started to carve and construct his puppet. “What shall I call him?” he wondered. “I’ll call him Pinocchio. That’ll bring him luck.”`,
+        pride: `“You are dancing with the only handsome girl in the room,” said Mr. Darcy, looking at the eldest Miss Bennet. “Oh! She is the most beautiful creature I ever beheld!”`,
+        pillars: `In a broad valley, at the foot of a sloping hillside, beside a clear bubbling stream, Tom was building a house. The walls were already three feet high and rising fast.`
     };
 
     const textSelect = document.getElementById('textSelect');
     const excerptDisplay = document.getElementById('excerptDisplay');
     const analyzeBtn = document.getElementById('analyzeBtn');
+    const encryptBtn = document.getElementById('encryptBtn');
+    const decryptBtn = document.getElementById('decryptBtn');
+    const showDistBtn = document.getElementById('showDistBtn');
+    const decryptBtnAfterDist = document.getElementById('decryptBtnAfterDist');
+    const shiftValue = document.getElementById('shiftValue');
+    const cryptoOutput = document.getElementById('cryptoOutput');
     let selectedText = '';
 
     textSelect.addEventListener('change', () => {
-      const selected = textSelect.value;
-      if (selected && excerpts[selected]) {
-        excerptDisplay.style.display = 'block';
-        excerptDisplay.textContent = excerpts[selected];
-        selectedText = excerpts[selected];
-        analyzeBtn.disabled = false;
-      } else {
-        excerptDisplay.style.display = 'none';
-        excerptDisplay.textContent = '';
-        selectedText = '';
-        analyzeBtn.disabled = true;
-      }
+        const selected = textSelect.value;
+        if (selected && excerpts[selected]) {
+            excerptDisplay.style.display = 'block';
+            excerptDisplay.textContent = excerpts[selected];
+            selectedText = excerpts[selected];
+            analyzeBtn.disabled = false;
+            encryptBtn.style.display = 'block'; // Show encryption button
+        } else {
+            excerptDisplay.style.display = 'none';
+            excerptDisplay.textContent = '';
+            selectedText = '';
+            analyzeBtn.disabled = true;
+            encryptBtn.style.display = 'none'; // Hide encryption button
+        }
     });
 
     analyzeBtn.addEventListener('click', () => {
-      if (!selectedText) return;
-      const freq = {};
-      selectedText.replace(/[^a-zA-Z]/g, '').toUpperCase().split('').forEach(l => {
-        freq[l] = (freq[l] || 0) + 1;
-      });
-      const labels = Object.keys(freq);
-      const data = Object.values(freq);
-      const ctxChart = document.getElementById('freqChart').getContext('2d');
-      document.getElementById('freqChart').style.display = 'block';
-      new Chart(ctxChart, {
-        type: 'bar',
-        data: { labels: labels, datasets: [{ label: 'Letter Frequency', data: data, backgroundColor: 'rgba(255, 204, 51, 0.7)', borderColor: '#ffaa00', borderWidth: 1 }] },
-        options: { animation: { duration: 2000, easing: 'easeOutBounce' }, scales: { y: { beginAtZero: true } } }
-      });
+        if (!selectedText) return;
+        const freq = {};
+        selectedText.replace(/[^a-zA-Z]/g, '').toUpperCase().split('').forEach(l => {
+            freq[l] = (freq[l] || 0) + 1;
+        });
+        const labels = Object.keys(freq);
+        const data = Object.values(freq);
+        const ctxChart = document.getElementById('freqChart').getContext('2d');
+        document.getElementById('freqChart').style.display = 'block';
+        new Chart(ctxChart, {
+            type: 'bar',
+            data: { 
+                labels: labels,
+                datasets: [{
+                    label: 'Letter Frequency',
+                    data: data,
+                    backgroundColor: 'rgba(255, 204, 51, 0.7)',
+                    borderColor: '#ffaa00',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                animation: { duration: 2000, easing: 'easeOutBounce' },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
     });
 
-    const canvasBG = document.getElementById('bg');
-    const ctx = canvasBG.getContext('2d');
-    function resizeCanvas(){canvasBG.width=window.innerWidth;canvasBG.height=window.innerHeight;}
-    window.addEventListener('resize',resizeCanvas);
-    resizeCanvas();
-    const points=[];
-    for(let i=0;i<120;i++){
-      points.push({x:Math.random()*canvasBG.width,y:Math.random()*canvasBG.height,vx:(Math.random()-0.5)*0.4,vy:(Math.random()-0.5)*0.4});
+    encryptBtn.addEventListener('click', () => {
+        if (!selectedText) return;
+        const shift = parseInt(shiftValue.value) || 3;
+        const encrypted = caesarEncrypt(selectedText, shift);
+        cryptoOutput.style.display = 'block';
+        cryptoOutput.textContent = `Encrypted Text: ${encrypted}`;
+        showDistBtn.style.display = 'block'; // Show distribution button
+    });
+
+    showDistBtn.addEventListener('click', () => {
+        if (!cryptoOutput.textContent) return;
+        const encryptedText = cryptoOutput.textContent.replace('Encrypted Text: ', '');
+        const freq = {};
+        encryptedText.replace(/[^a-zA-Z]/g, '').toUpperCase().split('').forEach(l => {
+            freq[l] = (freq[l] || 0) + 1;
+        });
+        const labels = Object.keys(freq);
+        const data = Object.values(freq);
+        const ctxChart = document.getElementById('cryptoFreqChart').getContext('2d');
+        document.getElementById('cryptoFreqChart').style.display = 'block';
+        new Chart(ctxChart, {
+            type: 'bar',
+            data: { 
+                labels: labels,
+                datasets: [{
+                    label: 'Encrypted Text Letter Frequency',
+                    data: data,
+                    backgroundColor: 'rgba(255, 204, 51, 0.7)',
+                    borderColor: '#ffaa00',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                animation: { duration: 2000, easing: 'easeOutBounce' },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+        decryptBtnAfterDist.style.display = 'block'; // Show decrypt button after distribution
+    });
+
+    decryptBtnAfterDist.addEventListener('click', () => {
+        const shift = parseInt(shiftValue.value) || 3;
+        const decrypted = caesarDecrypt(cryptoOutput.textContent.replace('Encrypted Text: ', ''), shift);
+        cryptoOutput.textContent = `Decrypted Text: ${decrypted}`;
+    });
+
+    function caesarEncrypt(text, shift) {
+        return text.split('')
+            .map(char => {
+                if (char.match(/[a-zA-Z]/)) {
+                    const base = char <= 'Z' ? 65 : 97;
+                    return String.fromCharCode(((char.charCodeAt(0) - base + shift) % 26) + base);
+                }
+                return char;
+            })
+            .join('');
     }
-    function drawBG(){
-      ctx.clearRect(0,0,canvasBG.width,canvasBG.height);
-      for(let i=0;i<points.length;i++){
-        const p1=points[i];
-        for(let j=i+1;j<points.length;j++){
-          const p2=points[j];
-          const dx=p1.x-p2.x,dy=p1.y-p2.y,dist=Math.hypot(dx,dy);
-          if(dist<120){
-            ctx.strokeStyle=`rgba(255,200,0,${(1-dist/120)*0.08})`;
-            ctx.beginPath();
-            ctx.moveTo(p1.x,p1.y);
-            ctx.lineTo(p2.x,p2.y);
-            ctx.stroke();
-          }
-        }
-        p1.x+=p1.vx;p1.y+=p1.vy;
-        if(p1.x<0||p1.x>canvasBG.width)p1.vx*=-1;
-        if(p1.y<0||p1.y>canvasBG.height)p1.vy*=-1;
-        ctx.beginPath();
-        ctx.arc(p1.x,p1.y,2,0,Math.PI*2);
-        ctx.fillStyle='#ffcc00';
-        ctx.fill();
-      }
-      requestAnimationFrame(drawBG);
+
+    function caesarDecrypt(text, shift) {
+        return text.split('')
+            .map(char => {
+                if (char.match(/[a-zA-Z]/)) {
+                    const base = char <= 'Z' ? 65 : 97;
+                    return String.fromCharCode(((char.charCodeAt(0) - base - shift + 26) % 26) + base);
+                }
+                return char;
+            })
+            .join('');
     }
-    drawBG();
   </script>
 </body>
 </html>
