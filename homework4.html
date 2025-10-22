@@ -1,12 +1,10 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Homework 4 - Legge dei Grandi Numeri - Gaia Diodati</title>
-  <!-- Import di Chart.js per i grafici -->
+  <title>Homework 4 - Law of Large Numbers - Gaia Diodati</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Import per il plugin di annotazione di Chart.js (per la linea del 50%) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/1.4.0/chartjs-plugin-annotation.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap');
@@ -80,7 +78,7 @@
       margin: 6px 0;
     }
     
-    /* Stile H2 specifico per i post-card */
+    /* Specific H2 style for post-card */
     .post-card h2 {
       font-family: 'Orbitron', sans-serif;
       color: #ffaa00;
@@ -182,7 +180,7 @@
       color: #000;
     }
     
-    /* --- INIZIO STILI PER SIMULAZIONE --- */
+    /* --- START SIMULATION STYLES --- */
     
     .post-card label {
       display: block;
@@ -203,7 +201,7 @@
       font-family: 'Rajdhani', sans-serif;
       font-size: 1rem;
       margin-bottom: 12px;
-      box-sizing: border-box; /* Importante per 100% width */
+      box-sizing: border-box; /* Important for 100% width */
     }
     
     .post-card button {
@@ -239,7 +237,7 @@
         font-family: 'Roboto Mono', monospace;
     }
     
-    /* --- FINE STILI PER SIMULAZIONE --- */
+    /* --- END SIMULATION STYLES --- */
     
   </style>
 </head>
@@ -248,61 +246,58 @@
 
   <div class="hero">
     <h1 data-text="Homework 4">Homework 4</h1>
-    <h2>La Legge dei Grandi Numeri</h2>
-    <p class="subtitle">Gaia Diodati – Matricola 2279030<br>Corso Magistrale in Cyber Security – Sapienza</p>
+    <h2>The Law of Large Numbers</h2>
+    <p class="subtitle">Gaia Diodati – Matricola 2279030<br>Master's Degree in Cyber Security – Sapienza University</p>
   </div>
 
   <section class="posts">
   
-    <!-- Card 1: Spiegazione -->
     <div class="post-card">
-      <h2>La Legge dei Grandi Numeri</h2>
-      <p>La Legge dei Grandi Numeri è un teorema fondamentale della statistica. In termini semplici, afferma che se ripeti un esperimento (come lanciare una moneta) un numero molto elevato di volte, la media dei risultati che ottieni si avvicinerà sempre di più al valore atteso (la probabilità teorica).</p>
-      <p>Per il lancio di una moneta non truccata, la probabilità teorica di ottenere "1" (Testa) è 0.5 (o 50%). Questo non significa che se lanci la moneta 10 volte otterrai esattamente 5 teste. Potresti ottenerne 3, o 7. Ma se la lanci <strong>1.000.000 di volte</strong>, è quasi garantito che il numero di teste sarà molto, molto vicino a 500.000, e la frequenza osservata (<code>Teste / Totale Lanci</code>) sarà estremamente vicina a 0.5.</p>
+      <h2>The Law of Large Numbers</h2>
+      <p>The **Law of Large Numbers** is a fundamental theorem in statistics. Simply put, it states that if you repeat an experiment (like flipping a coin) a very large number of times, the average of the results you get will get closer and closer to the expected value (the theoretical probability).</p>
+      <p>For a fair coin toss, the theoretical probability of getting "1" (Heads) is $0.5$ (or $50\%$). This doesn't mean that if you flip the coin 10 times, you'll get exactly 5 heads. You might get 3, or 7. But if you flip it **1,000,000 times**, it's almost guaranteed that the number of heads will be very, very close to 500,000, and the observed frequency ($\text{Heads} / \text{Total Tosses}$) will be extremely close to $0.5$.</p>
     </div>
     
-    <!-- Card 2: La Simulazione -->
     <div class="post-card">
-      <h2>Simulazione del Lancio di Moneta</h2>
-      <p>Questa simulazione esegue un "lancio di moneta" generando un numero casuale tra 0 e 1. Se il numero è <code>< 0.5</code>, lo contiamo come "0" (Croce). Se è <code>>= 0.5</code>, lo contiamo come "1" (Testa). Eseguiamo questo esperimento <code>N</code> volte e visualizziamo i risultati in due grafici.</p>
+      <h2>Coin Flip Simulation</h2>
+      <p>This simulation performs a "coin flip" by generating a random number between $0$ and $1$. If the number is $<\ 0.5$, we count it as "0" (Tails). If it is $\ge 0.5$, we count it as "1" (Heads). We run this experiment $\text{N}$ times and display the results in two charts.</p>
       
       <div>
-        <label for="numTrials">1. Numero di Lanci (N):</label>
+        <label for="numTrials">1. Number of Tosses ($\text{N}$):</label>
         <input type="number" id="numTrials" value="1000">
       </div>
       <div>
-        <button id="runSimulationBtn">Esegui Simulazione</button>
+        <button id="runSimulationBtn">Run Simulation</button>
       </div>
       
       <hr style="border-color: rgba(255, 200, 0, 0.3); margin: 20px 0;">
       
-      <h4>Risultati della Simulazione:</h4>
-      <div id="results">I risultati appariranno qui...</div>
+      <h4>Simulation Results:</h4>
+      <div id="results">Results will appear here...</div>
       
-      <h4 style="margin-top: 20px;">Grafico 1: Random Walk (Somma Cumulativa di "1")</h4>
-      <p>Questo grafico mostra l'accumulo di "Teste" (1) nel tempo. La linea sale di 1 ogni volta che esce "1" e rimane orizzontale quando esce "0", come richiesto.</p>
+      <h4 style="margin-top: 20px;">Chart 1: Random Walk (Cumulative Sum of "1")</h4>
+      <p>This chart shows the accumulation of "Heads" (1) over time. The line goes up by 1 every time "1" comes up and stays horizontal when "0" comes up, as requested.</p>
       <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; margin-top: 10px;">
         <canvas id="walkChart"></canvas>
       </div>
       
-      <h4 style="margin-top: 20px;">Grafico 2: Convergenza della Probabilità (Legge dei Grandi Numeri)</h4>
-      <p>Questo grafico dimostra la legge. Mostra la frequenza osservata (<code>Totale Teste / Lanci Effettuati</code>) ad ogni passo. Come puoi vedere, dopo un'incertezza iniziale, la linea "si allinea" e converge stabilmente verso la probabilità reale del 50% (la linea rossa tratteggiata).</p>
+      <h4 style="margin-top: 20px;">Chart 2: Probability Convergence (Law of Large Numbers)</h4>
+      <p>This chart visually demonstrates the law. It shows the observed frequency ($\text{Total Heads} / \text{Tosses Performed}$) at each step. As you can see, after initial uncertainty, the line "levels out" and stably converges towards the true probability of $50\%$ (the red dashed line).</p>
       <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; margin-top: 10px;">
         <canvas id="probChart"></canvas>
       </div>
     </div>
 
-    <!-- Card 3: Conclusione -->
-     <div class="post-card">
-      <h2>Conclusione</h2>
-      <p>Questa simulazione dimostra visivamente perché la statistica è così potente. Anche se i singoli eventi (un lancio di moneta) sono imprevedibili, il comportamento aggregato di <strong>molti</strong> eventi (migliaia di lanci) diventa estremamente prevedibile. La casualità a breve termine si trasforma in stabilità a lungo termine.</p>
-      <p>Questo è lo stesso principio usato in cybersecurity per distinguere il normale traffico di rete (milioni di pacchetti che seguono uno schema) da un'anomalia (un attacco che devia da quello schema).</p>
-      <a href="index.html">← Torna all'Indice</a>
+    <div class="post-card">
+      <h2>Conclusion</h2>
+      <p>This simulation visually demonstrates why statistics is so powerful. Even though individual events (a coin toss) are unpredictable, the aggregate behavior of **many** events (thousands of tosses) becomes extremely predictable. Short-term randomness turns into long-term stability.</p>
+      <p>This is the same principle used in **cybersecurity** to distinguish normal network traffic (millions of packets following a pattern) from an anomaly (an attack deviating from that pattern).</p>
+      <a href="index.html">← Back to Index</a>
     </div>
   </section>
 
   <script>
-    // --- SCRIPT 1: Animazione Canvas Sfondo ---
+    // --- SCRIPT 1: Canvas Background Animation ---
     const canvas = document.getElementById('bg');
     const ctx = canvas.getContext('2d');
 
@@ -357,9 +352,14 @@
     }
     draw();
     
-    // --- SCRIPT 2: Logica Simulazione Legge Grandi Numeri ---
+    // --- SCRIPT 2: Law of Large Numbers Simulation Logic (CORRECTED) ---
     document.addEventListener('DOMContentLoaded', () => {
-
+        // FIX: Explicitly register the annotation plugin.
+        // We check for the global variable exposed by the CDN and register it.
+        if (window.Chart && window.ChartAnnotation) {
+             Chart.register(window.ChartAnnotation);
+        }
+        
         const trialsInput = document.getElementById('numTrials');
         const runBtn = document.getElementById('runSimulationBtn');
         const resultsDiv = document.getElementById('results');
@@ -372,17 +372,17 @@
         const runSimulation = () => {
             try {
                 const numTrials = parseInt(trialsInput.value);
-                if (numTrials <= 0) {
-                    resultsDiv.innerHTML = `<span style="color: #ff6b6b;">Inserisci un numero di lanci valido.</span>`;
+                if (numTrials <= 0 || isNaN(numTrials)) {
+                    resultsDiv.innerHTML = `<span style="color: #ff6b6b;">Please enter a valid number of trials.</span>`;
                     return;
                 }
 
                 let heads = 0;
                 let tails = 0;
                 
-                const walkData = [0]; // Dati per Grafico 1 (Random Walk)
-                const probData = []; // Dati per Grafico 2 (Convergenza)
-                const labels = []; // Etichette per l'asse X
+                const walkData = [0]; // Data for Chart 1 (Random Walk)
+                const probData = []; // Data for Chart 2 (Convergence)
+                const labels = []; // Labels for X-axis
 
                 for (let i = 1; i <= numTrials; i++) {
                     const toss = Math.random();
@@ -396,34 +396,34 @@
                         tails++;
                     }
                     
-                    // Grafico 1: Aggiungi 1 se è testa, 0 se è croce
+                    // Chart 1: Add 1 if heads, 0 if tails
                     const lastValue = walkData[walkData.length - 1];
                     walkData.push(lastValue + result);
                     
-                    // Grafico 2: Calcola la probabilità corrente
+                    // Chart 2: Calculate the current probability
                     const currentProb = heads / i;
                     probData.push(currentProb);
                     
                     labels.push(i);
                 }
 
-                // Aggiorna i risultati
+                // Update results
                 const observedProb = (heads / numTrials) * 100;
-                resultsDiv.innerHTML = `Lanci Totali: <b style="color: #ffaa00;">${numTrials}</b><br>` +
-                                     `Teste (1): <b style="color: #ffaa00;">${heads}</b><br>` +
-                                     `Croci (0): <b style="color: #ffaa00;">${tails}</b><br>` +
-                                     `Frequenza Osservata di "1": <b style="color: #00ffcc;">${observedProb.toFixed(4)}%</b>`;
+                resultsDiv.innerHTML = `Total Tosses: <b style="color: #ffaa00;">${numTrials}</b><br>` +
+                                     `Heads (1): <b style="color: #ffaa00;">${heads}</b><br>` +
+                                     `Tails (0): <b style="color: #ffaa00;">${tails}</b><br>` +
+                                     `Observed Frequency of "1": <b style="color: #00ffcc;">${observedProb.toFixed(4)}%</b>`;
 
-                // Aggiorna i grafici
+                // Update charts
                 updateCharts(labels, walkData, probData);
 
             } catch (err) {
-                resultsDiv.innerHTML = `<span style="color: #ff6b6b;">Errore: ${err.message}</span>`;
+                resultsDiv.innerHTML = `<span style="color: #ff6b6b;">Error: ${err.message}</span>`;
             }
         };
         
         const updateCharts = (labels, walkData, probData) => {
-            // Distruggi i grafici esistenti se ci sono
+            // Destroy existing charts if they exist
             if (walkChart) {
                 walkChart.destroy();
             }
@@ -431,44 +431,64 @@
                 probChart.destroy();
             }
             
-            // --- Grafico 1: Random Walk ---
+            // --- Chart 1: Random Walk ---
             walkChart = new Chart(walkCanvas, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Somma Cumulativa di "1" (Teste)',
-                        data: walkData.slice(1), // Rimuovi lo 0 iniziale per allineare
+                        label: 'Cumulative Sum of "1" (Heads)',
+                        data: walkData.slice(1), // Remove the initial 0 to align
                         borderColor: 'rgba(255, 170, 0, 1)', // #ffaa00
                         backgroundColor: 'rgba(255, 170, 0, 0.3)',
                         borderWidth: 2,
                         pointRadius: 0,
-                        tension: 0.1
+                        stepped: true, // Use stepped line for random walk visualization
+                        tension: 0
                     }]
                 },
                 options: {
                     scales: {
-                        y: { ticks: { color: '#fff3cc' }, grid: { color: 'rgba(255, 200, 0, 0.15)' } },
-                        x: { ticks: { color: '#fff3cc' }, grid: { color: 'rgba(255, 200, 0, 0.15)' } }
+                        y: { 
+                            ticks: { color: '#fff3cc' }, 
+                            grid: { color: 'rgba(255, 200, 0, 0.15)' },
+                            title: {
+                                display: true,
+                                text: 'Cumulative Heads Count',
+                                color: '#fff3cc'
+                            }
+                        },
+                        x: { 
+                            ticks: { color: '#fff3cc' }, 
+                            grid: { color: 'rgba(255, 200, 0, 0.15)' },
+                            title: {
+                                display: true,
+                                text: 'Number of Tosses',
+                                color: '#fff3cc'
+                            }
+                        }
                     },
-                    plugins: { legend: { labels: { color: '#fff3cc' } } }
+                    plugins: { 
+                        legend: { labels: { color: '#fff3cc' } } 
+                    }
                 }
             });
             
-            // --- Grafico 2: Convergenza Probabilità ---
+            // --- Chart 2: Probability Convergence ---
             probChart = new Chart(probCanvas, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [
                         {
-                            label: 'Frequenza Osservata di "1"',
+                            label: 'Observed Frequency of "1"',
                             data: probData,
                             borderColor: 'rgba(0, 255, 204, 1)', // #00ffcc
                             backgroundColor: 'rgba(0, 255, 204, 0.3)',
                             borderWidth: 2,
                             pointRadius: 0,
-                            tension: 0.1
+                            tension: 0.1,
+                            fill: false // Do not fill the area under the line
                         }
                     ]
                 },
@@ -477,17 +497,30 @@
                         y: { 
                             min: 0, 
                             max: 1,
-                            ticks: { color: '#fff3cc' }, 
-                            grid: { color: 'rgba(255, 200, 0, 0.15)' } 
+                            ticks: { 
+                                color: '#fff3cc',
+                                callback: function(value) { return (value * 100).toFixed(0) + '%'; }
+                            }, 
+                            grid: { color: 'rgba(255, 200, 0, 0.15)' },
+                            title: {
+                                display: true,
+                                text: 'Observed Frequency',
+                                color: '#fff3cc'
+                            }
                         },
                         x: { 
                             ticks: { color: '#fff3cc' }, 
-                            grid: { color: 'rgba(255, 200, 0, 0.15)' } 
+                            grid: { color: 'rgba(255, 200, 0, 0.15)' },
+                            title: {
+                                display: true,
+                                text: 'Number of Tosses',
+                                color: '#fff3cc'
+                            }
                         }
                     },
                     plugins: {
                         legend: { labels: { color: '#fff3cc' } },
-                        // Aggiungiamo la linea del 50%
+                        // Add the 50% line
                         annotation: {
                             annotations: {
                                 line1: {
@@ -498,25 +531,25 @@
                                     borderWidth: 2,
                                     borderDash: [10, 5],
                                     label: {
-                                        content: 'Probabilità Reale (50%)',
+                                        content: 'True Probability (50%)',
                                         enabled: true,
                                         position: 'start',
-                                        color: 'rgba(255, 50, 50, 0.8)'
+                                        color: 'rgba(255, 50, 50, 0.8)',
+                                        font: {
+                                            family: 'Roboto Mono',
+                                            size: 10
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                },
-                // Registra il plugin
-                plugins: [ChartDataLabels]
+                }
             });
-             // Registra il plugin di annotazione globalmente (necessario una volta)
-             //Chart.register(window.ChartAnnotation);
         };
 
         runBtn.addEventListener('click', runSimulation);
-        runSimulation(); // Esegui al caricamento della pagina
+        runSimulation(); // Run on page load
     });
   </script>
 </body>
