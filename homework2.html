@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Homework 2 – Caesar Cipher</title>
+  <title>Homework 2 – Distribution and Caesar Cipher</title>
+  <!-- Load Chart.js for distribution charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@400;600&display=swap');
@@ -13,9 +14,11 @@
       font-family: 'Rajdhani', sans-serif;
       color: #fff5cc;
       background: #050505;
+      padding: 40px 20px;
+      line-height: 1.7;
       overflow-x: hidden;
     }
-
+    
     canvas#bg {
       position: fixed;
       top: 0;
@@ -28,13 +31,30 @@
     .card {
       width: 85%;
       max-width: 750px;
-      margin: 60px auto;
+      margin: 30px auto;
       padding: 35px 25px;
       border-radius: 16px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 200, 0, 0.3);
       box-shadow: 0 0 25px rgba(255, 200, 0, 0.15);
       backdrop-filter: blur(6px);
+    }
+    
+    a.back {
+      display: inline-block;
+      margin: 0 0 20px 7.5%; /* Align with the card */
+      color: #ffcc00;
+      text-decoration: none;
+      border: 1px solid #ffcc00;
+      padding: 6px 12px;
+      border-radius: 999px;
+      transition: all .2s ease;
+      position: relative;
+      z-index: 10;
+    }
+    a.back:hover {
+      background: #ffaa00;
+      color: #000;
     }
 
     h1, h2 {
@@ -81,8 +101,20 @@
       cursor: pointer;
       transition: all 0.3s ease;
     }
+    
+    input[type="number"] {
+        max-width: 100px;
+        text-align: center;
+    }
 
-    button:hover, select:hover { background: rgba(255,200,0,0.15); }
+    button:hover, select:hover:not(:disabled) { 
+        background: rgba(255,200,0,0.15); 
+    }
+    
+    button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 
     #excerptDisplay {
       margin-top: 20px;
@@ -93,39 +125,40 @@
       max-height: 200px;
       overflow-y: auto;
       white-space: pre-line;
+      font-family: monospace;
+      font-size: 0.9rem;
     }
-
+    
     #cryptoOutput {
       margin-top: 20px;
       background: rgba(255,255,255,0.05);
       border-radius: 12px;
       padding: 20px;
+      min-height: 50px;
       display: none;
       transition: all 0.4s ease;
       text-shadow: 0 0 6px rgba(255,200,0,0.6);
+      font-family: monospace;
+    }
+    
+    #cryptoFreqChart, #freqChart {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 15px;
     }
   </style>
 </head>
 <body>
   <canvas id="bg"></canvas>
+  <a href="index.html" class="back">← Back to Home</a>
 
   <div class="card">
-    <h1>🧩 What is a Dataset?</h1>
-    <p>A <span style="color:#ffd966">dataset</span> is a collection of related data, usually organized in a table with rows and columns.</p>
-    <p>Each row represents an observation or record (e.g., one user, one device, one log event).</p>
-    <p>Each column represents a variable or feature (e.g., IP address, login time, response code).</p>
-    <p><b>👉 In short:</b> A dataset is like a structured spreadsheet that stores information you can analyze.</p>
-  </div>
-
-  <div class="card">
-    <h1>📊 What is a Distribution?</h1>
-    <p>A <span style="color:#ffd966">distribution</span> shows how often each value or event appears in a dataset.</p>
-    <p>In cybersecurity, distributions can reveal patterns — for instance, if most logins happen around 9 AM but suddenly there’s a spike at midnight, that anomaly might suggest an intrusion attempt.</p>
-    <p>Distributions help us <b>detect unusual behavior</b> and <b>quantify probability</b> — both crucial in data-driven defense.</p>
-  </div>
-
-  <div class="card">
-    <h1>Cybersecurity Login Dataset</h1>
+    <h1>🧩 Definition of Dataset and Distribution</h1>
+    
+    <h2>Dataset</h2>
+    <p>A <span style="color:#ffd966">dataset</span> is a structured collection of data, usually organized into rows (observations) and columns (variables/features). In cybersecurity, rows might be log events, and columns might be the IP address, timestamp, or response code.</p>
+    
+    <h3>Raw Data Example: Login Events</h3>
     <table>
       <tr><th>User_ID</th><th>Login_Time</th><th>Failed_Attempts</th><th>Device</th><th>Location</th></tr>
       <tr><td>U001</td><td>09:10</td><td>1</td><td>Windows</td><td>Italy</td></tr>
@@ -134,30 +167,34 @@
       <tr><td>U004</td><td>02:45</td><td>5</td><td>Android</td><td>China</td></tr>
       <tr><td>U005</td><td>11:25</td><td>2</td><td>Windows</td><td>USA</td></tr>
     </table>
+
+    <h2>Distribution</h2>
+    <p>A <span style="color:#ffd966">distribution</span> describes how the values of a variable occur in a dataset, showing the frequency with which each value or range of values appears. Understanding the "normal" distribution is crucial for **Anomaly Detection**.</p>
   </div>
+  
+  <!-- CARD UNIVARIATA (Con tabella di frequenza corretta) -->
+  <div class="card">
+    <h1>📈 Univariate Distribution (Example)</h1>
+    <p>A <span style="color:#ffd966">univariate distribution</span> analyzes the frequency of a single variable at a time. It uses summary tables (like the frequency table below for the 'Device' variable) or charts to characterize the distribution of individual features in a dataset.</p>
+    
+    <h3>Frequency Table for 'Device'</h3>
+    <table>
+      <tr><th>Device Type</th><th>Frequency (Count)</th><th>Relative Frequency (%)</th></tr>
+      <tr><td>Windows</td><td>2</td><td>40%</td></tr>
+      <tr><td>Linux</td><td>1</td><td>20%</td></tr>
+      <tr><td>MacOS</td><td>1</td><td>20%</td></tr>
+      <tr><td>Android</td><td>1</td><td>20%</td></tr>
+      <tr><th>Total</th><th>5</th><th>100%</th></tr>
+    </table>
+    <p style="margin-top:15px; font-size:0.95rem; opacity:0.8;">(This data is derived from the five example login events: U001, U002, U003, U004, U005.)</p>
+  </div>
+  <!-- FINE CARD UNIVARIATA -->
 
   <div class="card">
-    <h1>SQL Table Creation</h1>
-    <pre>CREATE TABLE LoginEvents (
-  User_ID TEXT,
-  Login_Time TEXT,
-  Failed_Attempts INTEGER,
-  Device TEXT,
-  Location TEXT
-);
-
-INSERT INTO LoginEvents VALUES
-('U001', '09:10', 1, 'Windows', 'Italy'),
-('U002', '23:58', 4, 'Linux', 'Russia'),
-('U003', '10:05', 0, 'MacOS', 'Italy'),
-('U004', '02:45', 5, 'Android', 'China'),
-('U005', '11:25', 2, 'Windows', 'USA');</pre>
-  </div>
-
-  <div class="card">
-    <h1>📊 Bivariate Distribution</h1>
-    <p>A <span style="color:#ffd966">bivariate distribution</span> is a probability distribution that shows the relationship between two variables. It illustrates how the values of two variables change together. In this case, we analyze the <b>Device Type</b> and <b>Failed Login Attempts</b>.</p>
-    <p>This kind of distribution helps identify correlations and patterns, like whether certain devices experience more failed login attempts than others.</p>
+    <h1>📊 Bivariate Distribution (Example)</h1>
+    <p>A <span style="color:#ffd966">bivariate distribution</span> analyzes the relationship between two variables. In this security example, we examine the relationship between the <b>Device Type</b> and <b>Failed Login Attempts</b> to identify suspicious correlations (e.g., whether a certain OS is more often targeted by brute-force attacks).</p>
+    
+    <h3>Joint Frequency Table (Bivariate: Device vs. Failed Attempts)</h3>
     <table>
       <tr><th>Device</th><th>0-2 Attempts</th><th>3-5 Attempts</th><th>6+ Attempts</th></tr>
       <tr><td>Windows</td><td>1</td><td>1</td><td>0</td></tr>
@@ -168,17 +205,17 @@ INSERT INTO LoginEvents VALUES
   </div>
 
   <div class="card">
-    <h1>📄 Upload or Choose a Text</h1>
-    <p>Upload any file (PDF, DOCX, TXT) or select one of our sample texts below to analyze letter frequencies.</p>
+    <h1>🔡 Text Frequency Analysis</h1>
+    <p>The distribution of letters in a text is the basis of cryptanalysis. Every language has a characteristic frequency (e.g., 'E' is the most common in Italian and English).</p>
+    <p>Select a text and compute the letter distribution to establish the **statistical baseline**.</p>
     <div id="uploadBox">
-      <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx">
-      <span style="color:#ffd966">or</span>
+      <span style="color:#ffd966">Choose a sample text:</span>
       <select id="textSelect">
         <option value="">Select a text...</option>
-        <option value="harry">Excerpt from <i>Harry Potter</i></option>
-        <option value="pinocchio">Excerpt from <i>Pinocchio</i></option>
-        <option value="pride">Excerpt from <i>Pride and Prejudice</i></option>
-        <option value="pillars">Excerpt from <i>The Pillars of the Earth</i></option>
+        <option value="harry">Excerpt from <i>Harry Potter</i> (English)</option>
+        <option value="pillars">Excerpt from <i>The Pillars of the Earth</i> (English)</option>
+        <option value="pride">Excerpt from <i>Pride and Prejudice</i> (English)</option>
+        <option value="pinocchio">Excerpt from <i>Pinocchio</i> (Italian)</option>
       </select>
     </div>
     <div id="excerptDisplay"></div>
@@ -187,160 +224,504 @@ INSERT INTO LoginEvents VALUES
   </div>
 
   <div class="card">
-    <h1>🔐 Caesar Cipher</h1>
-    <p>The <b>Caesar Cipher</b> is one of the oldest encryption techniques, shifting each letter in the text by a fixed number of positions in the alphabet. Despite its simplicity, it forms the basis of many modern encryption concepts.</p>
-    <label>Shift value:</label>
+    <h1>🔐 Caesar Cipher Cryptanalysis</h1>
+    <p>The <b>Caesar Cipher</b> is vulnerable to frequency cryptanalysis because the letter distribution remains the same, just shifted.</p>
+    <p><b>Step 1: Encryption (Known Shift)</b></p>
+    <label>Shift Value (Key):</label>
     <input type="number" id="shiftValue" value="3" min="1" max="25">
     <div style="margin-top:10px;display:flex;gap:10px;justify-content:center">
-      <button id="encryptBtn">Encrypt Text</button>
-      <button id="decryptBtn" style="display:none;">Decrypt Text</button>
-      <button id="showDistBtn" style="display:none;">Show Letter Distribution</button>
+      <button id="encryptBtn" disabled>Encrypt Text</button>
+      <button id="showDistBtn" style="display:none;">Show Encrypted Distribution</button>
     </div>
     <div id="cryptoOutput"></div>
     <canvas id="cryptoFreqChart" style="display:none;max-height:400px;margin-top:30px"></canvas>
-  </div>
-
-  <!-- New card for decryption logic -->
-  <div class="card">
-    <h1>🔐 Decryption Logic</h1>
-    <p>The <b>Caesar Cipher</b> works by shifting the letters of the alphabet by a fixed number. To decrypt the message, we simply reverse the shift. For example, if the text was encrypted with a shift of 3, we would shift each letter 3 positions backward to recover the original text.</p>
-    <button id="decryptBtnAfterDist" style="display:none;">Decrypt Text</button>
+    
+    <p style="margin-top:20px; border-top: 1px dashed rgba(255, 200, 0, 0.3); padding-top: 15px;"><b>Step 2: Statistical Decryption (Attack Simulation)</b></p>
+    <p>Simulate the cryptanalysis attack: to decipher, we find the letter with the highest frequency in the cipher text (the peak on the graph). We assume this letter corresponds to the most common letter in the source language (**E** for English/Italian texts, **A** for Italian texts with an accent on it in the original text, but we'll stick to **E** for consistency in this example).</p>
+    <button id="decryptBtnAfterDist" style="display:none;">Decrypt with Frequency Analysis</button>
   </div>
 
   <script>
+    // --- SAMPLE TEXTS ---
     const excerpts = {
-        harry: `Harry had never even imagined such a strange and splendid place. It was lit by thousands and thousands of candles which were floating in mid-air over four long tables, where the rest of the students were sitting. These tables were laid with glittering golden plates and goblets. At the top of the Hall was another long table where the teachers were sitting.`,
-        pinocchio: `As soon as he entered, Geppetto took up his tools and started to carve and construct his puppet. “What shall I call him?” he wondered. “I’ll call him Pinocchio. That’ll bring him luck.”`,
-        pride: `“You are dancing with the only handsome girl in the room,” said Mr. Darcy, looking at the eldest Miss Bennet. “Oh! She is the most beautiful creature I ever beheld!”`,
-        pillars: `In a broad valley, at the foot of a sloping hillside, beside a clear bubbling stream, Tom was building a house. The walls were already three feet high and rising fast.`
+        harry: `Hagrid raised a gigantic fist and knocked three times
+on the castle door.
+The door swung open at once. A tall, black-haired
+witch in emerald-green robes stood there. She had a very
+stern face and Harry’s first thought was that this was not
+someone to cross.
+‘The firs’-years, Professor McGonagall,’ said Hagrid.
+‘Thank you, Hagrid. I will take them from here.’
+She pulled the door wide. The Entrance Hall was so big
+you could have fitted the whole of the Dursleys’ house in
+it. The stone walls were lit with flaming torches like the
+ones at Gringotts, the ceiling was too high to make out,
+and a magnificent marble staircase facing them led to
+the upper floors.
+They followed Professor McGonagall across the
+flagged stone floor. Harry could hear the drone of
+hundreds of voices from a doorway to the right – the rest
+of the school must already be here – but Professor
+McGonagall showed the first-years into a small empty
+chamber off the hall. They crowded in, standing rather
+closer together than they would usually have done,
+peering about nervously.
+‘Welcome to Hogwarts,’ said Professor McGonagall.
+‘The start-of-term banquet will begin shortly, but before
+you take your seats in the Great Hall, you will be sorted
+into your houses. The Sorting is a very important
+ceremony because, while you are here, your house will be
+something like your family within Hogwarts. You will
+have classes with the rest of your house, sleep in your
+house dormitory and spend free time in your house
+common room.
+‘The four houses are called Gryffindor, Hufflepuff,
+Ravenclaw and Slytherin. Each house has its own noble
+history and each has produced outstanding witches and
+wizards. While you are at Hogwarts, your triumphs will
+earn your house points, while any rule-breaking will lose
+house points. At the end of the year, the house with the
+most points is awarded the House Cup, a great honour. I
+hope each of you will be a credit to whichever house
+becomes yours.
+‘The Sorting Ceremony will take place in a few minutes
+in front of the rest of the school. I suggest you all
+smarten yourselves up as much as you can while you are
+waiting.’
+Her eyes lingered for a moment on Neville’s cloak,
+which was fastened under his left ear, and on Ron’s
+smudged nose. Harry nervously tried to flatten his hair.
+‘I shall return when we are ready for you,’ said
+Professor McGonagall. ‘Please wait quietly.’
+She left the chamber. Harry swallowed.
+‘How exactly do they sort us into houses?’ he asked
+Ron.
+‘Some sort of test, I think. Fred said it hurts a lot, but I
+think he was joking.’`,
+        pillars: `In a broad valley, at the foot of a sloping hillside, beside a clear bubbling stream, Tom was building a house.
+The walls were of stone, thick and rough. The roof was of shingles, dark and heavy. The ground floor was a single large room, with a dirt floor and a fireplace that took up most of one wall. Above, there was a loft for sleeping, reached by a crude ladder.
+It was not finished. The walls were not mortared, the roof was not watertight, the floor was uneven, and the loft was bare. The house was not meant to be finished in a hurry. Tom was a master builder, but he was also a man who worked alone, and he had a long way to go.
+He had started with a dream: to build the largest, most beautiful cathedral in England. He had built churches and castles before, but never a cathedral. He had wandered the country, looking for the right place, the right stone, the right patron. And he had found them all here, in the small, neglected town of Kingsbridge.`,
+        pride: `It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.
+However little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered as the rightful property of some one or other of their daughters.
+'My dear Mr. Bennet,' said his lady to him one day, 'have you heard that Netherfield Park is let at last?'
+Mr. Bennet replied that he had not.
+'But it is,' returned she; 'for Mrs. Long has just been here, and she told me all about it.'
+Mr. Bennet made no answer.
+'Do you not want to know who has taken it?' cried his wife impatiently.
+'You want to tell me, and I have no objection to hearing it.'
+This was invitation enough.
+'Why, my dear, you must know, Mrs. Long says that Netherfield is taken by a young man of large fortune from the north of England; that he came down on Monday in a chaise and four to see the place, and was so much delighted with it, that he agreed with Mr. Morris immediately; that he is to take possession before Michaelmas, and some of his servants are to be in the house by the end of next week.'`,
+        pinocchio: `V'era una volta...
+- Un re! - diranno subito i miei piccoli lettori.
+- No, ragazzi, avete sbagliato. V'era una volta un pezzo di legno.
+Non era un legno di lusso, ma un semplice pezzo da catasta, di quelli che d'inverno si mettono nelle stufe e nei camini per accendere il fuoco e per riscaldare le stanze.
+Non so come andasse, che un bel giorno questo pezzo di legno capitò nella bottega di un vecchio falegname, il quale aveva nome Mastro Ciliegia, ma che tutti chiamavano per soprannome Mastro Ciliegia, a cagione della punta del suo naso, che era sempre lustra e rossa, come una ciliegia matura.
+Appena Mastro Ciliegia ebbe visto quel pezzo di legno, si rallegrò tutto e, fregandosi le mani con soddisfazione, mormorò sottovoce:
+«Questo legno è capitato a proposito; voglio servirmene per fare una gamba di tavolino.»
+Detto fatto, prese subito l'ascia per cominciare a scortecciare e a sbozzare il legno; ma nell'atto di alzare il braccio, si sentì chiamare con una vocina sottile sottile:
+«Non mi picchiare troppo forte!»` // Italian text
     };
 
-    const textSelect = document.getElementById('textSelect');
-    const excerptDisplay = document.getElementById('excerptDisplay');
-    const analyzeBtn = document.getElementById('analyzeBtn');
-    const encryptBtn = document.getElementById('encryptBtn');
-    const decryptBtn = document.getElementById('decryptBtn');
-    const showDistBtn = document.getElementById('showDistBtn');
-    const decryptBtnAfterDist = document.getElementById('decryptBtnAfterDist');
-    const shiftValue = document.getElementById('shiftValue');
-    const cryptoOutput = document.getElementById('cryptoOutput');
-    let selectedText = '';
+    // --- GLOBAL STATE AND CHART INSTANCES ---
+    let plainText = '';
+    let cipherText = '';
+    let freqChart = null;
+    let cryptoFreqChart = null;
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
-    textSelect.addEventListener('change', () => {
-        const selected = textSelect.value;
-        if (selected && excerpts[selected]) {
-            excerptDisplay.style.display = 'block';
-            excerptDisplay.textContent = excerpts[selected];
-            selectedText = excerpts[selected];
-            analyzeBtn.disabled = false;
-            encryptBtn.style.display = 'block'; // Show encryption button
+    // --- UTILITY FUNCTIONS ---
+    
+    /**
+     * Converts text to uppercase and removes all non-alphabetical characters.
+     * @param {string} text The raw input text.
+     * @returns {string} The normalized text.
+     */
+    function normalizeText(text) {
+        // Replace non-ASCII letters (like Italian accents) with their non-accented version
+        // and then filter for only A-Z characters.
+        const normalized = text.toUpperCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^A-Z]/g, '');
+        return normalized;
+    }
+
+    /**
+     * Calculates the relative frequency of each letter A-Z in the text.
+     * @param {string} text The normalized text.
+     * @returns {{frequencies: number[], maxChar: string}} An object containing the 26 relative frequencies (0-100) and the most frequent character.
+     */
+    function calculateFrequency(text) {
+        const counts = new Array(26).fill(0);
+        let totalLetters = 0;
+
+        for (let i = 0; i < text.length; i++) {
+            const charCode = text.charCodeAt(i);
+            // Check if character is A-Z
+            if (charCode >= 65 && charCode <= 90) {
+                counts[charCode - 65]++;
+                totalLetters++;
+            }
+        }
+
+        const frequencies = counts.map(count => totalLetters > 0 ? (count / totalLetters) * 100 : 0);
+        
+        // Find the most frequent character
+        let maxFreq = -1;
+        let maxIndex = -1;
+        frequencies.forEach((freq, index) => {
+            if (freq > maxFreq) {
+                maxFreq = freq;
+                maxIndex = index;
+            }
+        });
+
+        const maxChar = maxIndex >= 0 ? alphabet[maxIndex] : '';
+
+        return { frequencies, maxChar };
+    }
+
+    /**
+     * Draws or updates a Chart.js bar chart.
+     * @param {string} canvasId The ID of the canvas element.
+     * @param {number[]} data The frequency data (26 values).
+     * @param {string} label The dataset label.
+     * @param {string} color The bar color.
+     * @param {Chart} chartInstance The chart instance to update (or null for new chart).
+     * @returns {Chart} The new/updated Chart instance.
+     */
+    function drawChart(canvasId, data, label, color, chartInstance) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        document.getElementById(canvasId).style.display = 'block';
+
+        const chartData = {
+            labels: alphabet,
+            datasets: [{
+                label: label,
+                data: data,
+                backgroundColor: color,
+                borderColor: color,
+                borderWidth: 1,
+            }]
+        };
+
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Relative Frequency (%)',
+                        color: '#ffd966'
+                    },
+                    grid: { color: 'rgba(255, 200, 0, 0.2)' },
+                    ticks: { color: '#fff' }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Letter',
+                        color: '#ffd966'
+                    },
+                    grid: { display: false },
+                    ticks: { color: '#fff' }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) { label += ': '; }
+                            label += context.parsed.y.toFixed(2) + '%';
+                            return label;
+                        }
+                    }
+                }
+            }
+        };
+
+        if (chartInstance) {
+            chartInstance.data.datasets[0].data = data;
+            chartInstance.data.datasets[0].label = label;
+            chartInstance.data.datasets[0].backgroundColor = color;
+            chartInstance.update();
+            return chartInstance;
         } else {
-            excerptDisplay.style.display = 'none';
-            excerptDisplay.textContent = '';
-            selectedText = '';
-            analyzeBtn.disabled = true;
-            encryptBtn.style.display = 'none'; // Hide encryption button
+            return new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: chartOptions,
+            });
+        }
+    }
+    
+    /**
+     * Performs a Caesar cipher on the text.
+     * @param {string} text The plain text.
+     * @param {number} shift The shift value (key).
+     * @returns {string} The cipher text.
+     */
+    function caesarCipher(text, shift) {
+        let result = '';
+        // Shift is applied to the raw input text, preserving spacing and punctuation
+        for (let i = 0; i < text.length; i++) {
+            let char = text.charAt(i);
+            const charCode = char.charCodeAt(0);
+
+            if (charCode >= 65 && charCode <= 90) { // Uppercase A-Z
+                result += String.fromCharCode(((charCode - 65 + shift) % 26) + 65);
+            } else if (charCode >= 97 && charCode <= 122) { // Lowercase a-z
+                result += String.fromCharCode(((charCode - 97 + shift) % 26) + 97);
+            } else {
+                result += char; // Non-alphabetic characters remain unchanged
+            }
+        }
+        return result;
+    }
+
+
+    // --- EVENT HANDLERS ---
+    
+    // 1. Handle Text Selection
+    document.getElementById('textSelect').addEventListener('change', (e) => {
+        const key = e.target.value;
+        const display = document.getElementById('excerptDisplay');
+        
+        // Reset state
+        plainText = key ? excerpts[key] : '';
+        cipherText = '';
+        document.getElementById('cryptoOutput').style.display = 'none';
+        document.getElementById('cryptoOutput').innerHTML = '';
+        document.getElementById('showDistBtn').style.display = 'none';
+        document.getElementById('decryptBtnAfterDist').style.display = 'none';
+        if (cryptoFreqChart) cryptoFreqChart.destroy();
+        cryptoFreqChart = null;
+
+        if (key) {
+            display.innerHTML = plainText;
+            display.style.display = 'block';
+            document.getElementById('analyzeBtn').disabled = false;
+            document.getElementById('encryptBtn').disabled = true;
+            if (freqChart) freqChart.destroy();
+            freqChart = null;
+            document.getElementById('freqChart').style.display = 'none';
+
+        } else {
+            display.style.display = 'none';
+            document.getElementById('analyzeBtn').disabled = true;
+            document.getElementById('encryptBtn').disabled = true;
         }
     });
 
-    analyzeBtn.addEventListener('click', () => {
-        if (!selectedText) return;
-        const freq = {};
-        selectedText.replace(/[^a-zA-Z]/g, '').toUpperCase().split('').forEach(l => {
-            freq[l] = (freq[l] || 0) + 1;
-        });
-        const labels = Object.keys(freq);
-        const data = Object.values(freq);
-        const ctxChart = document.getElementById('freqChart').getContext('2d');
-        document.getElementById('freqChart').style.display = 'block';
-        new Chart(ctxChart, {
-            type: 'bar',
-            data: { 
-                labels: labels,
-                datasets: [{
-                    label: 'Letter Frequency',
-                    data: data,
-                    backgroundColor: 'rgba(255, 204, 51, 0.7)',
-                    borderColor: '#ffaa00',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                animation: { duration: 2000, easing: 'easeOutBounce' },
-                scales: { y: { beginAtZero: true } }
-            }
-        });
+    // 2. Handle Baseline Analysis
+    document.getElementById('analyzeBtn').addEventListener('click', () => {
+        const normalized = normalizeText(plainText);
+        const { frequencies } = calculateFrequency(normalized);
+        
+        freqChart = drawChart(
+            'freqChart', 
+            frequencies, 
+            'Plaintext Frequency (%)', 
+            'rgba(50, 200, 255, 0.8)', // Blue color for plaintext
+            freqChart
+        );
+        
+        document.getElementById('encryptBtn').disabled = false;
+        // Scroll to the chart
+        document.getElementById('freqChart').scrollIntoView({ behavior: 'smooth' });
     });
 
-    encryptBtn.addEventListener('click', () => {
-        if (!selectedText) return;
-        const shift = parseInt(shiftValue.value) || 3;
-        const encrypted = caesarEncrypt(selectedText, shift);
-        cryptoOutput.style.display = 'block';
-        cryptoOutput.textContent = `Encrypted Text: ${encrypted}`;
-        showDistBtn.style.display = 'block'; // Show distribution button
+    // 3. Handle Encryption
+    document.getElementById('encryptBtn').addEventListener('click', () => {
+        const shift = parseInt(document.getElementById('shiftValue').value);
+        if (isNaN(shift) || shift < 1 || shift > 25) {
+            // Using a styled message box instead of alert()
+            const outputDiv = document.getElementById('cryptoOutput');
+            outputDiv.innerHTML = `<p style="color:red;">Error: Please enter a valid shift value between 1 and 25.</p>`;
+            outputDiv.style.display = 'block';
+            return;
+        }
+
+        cipherText = caesarCipher(plainText, shift);
+        const outputDiv = document.getElementById('cryptoOutput');
+        
+        // MODIFICA QUI: Rimuove l'output esteso e lascia solo il testo cifrato.
+        outputDiv.innerHTML = `
+            <p><b>Encryption Key (Shift):</b> ${shift}</p>
+            <p style="margin-top:10px;"><b>Ciphertext:</b></p>
+            <div style="font-size:0.8rem; max-height: 150px; overflow-y: auto; color:#fff">${cipherText}</div>
+        `;
+        // FINE MODIFICA
+        
+        outputDiv.style.display = 'block';
+        document.getElementById('showDistBtn').style.display = 'inline-block';
+        document.getElementById('decryptBtnAfterDist').style.display = 'none';
+
+        if (cryptoFreqChart) cryptoFreqChart.destroy();
+        cryptoFreqChart = null;
+        document.getElementById('cryptoFreqChart').style.display = 'none';
+
+        outputDiv.scrollIntoView({ behavior: 'smooth' });
     });
 
-    showDistBtn.addEventListener('click', () => {
-        if (!cryptoOutput.textContent) return;
-        const encryptedText = cryptoOutput.textContent.replace('Encrypted Text: ', '');
-        const freq = {};
-        encryptedText.replace(/[^a-zA-Z]/g, '').toUpperCase().split('').forEach(l => {
-            freq[l] = (freq[l] || 0) + 1;
-        });
-        const labels = Object.keys(freq);
-        const data = Object.values(freq);
-        const ctxChart = document.getElementById('cryptoFreqChart').getContext('2d');
-        document.getElementById('cryptoFreqChart').style.display = 'block';
-        new Chart(ctxChart, {
-            type: 'bar',
-            data: { 
-                labels: labels,
-                datasets: [{
-                    label: 'Encrypted Text Letter Frequency',
-                    data: data,
-                    backgroundColor: 'rgba(255, 204, 51, 0.7)',
-                    borderColor: '#ffaa00',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                animation: { duration: 2000, easing: 'easeOutBounce' },
-                scales: { y: { beginAtZero: true } }
-            }
-        });
-        decryptBtnAfterDist.style.display = 'block'; // Show decrypt button after distribution
+    // 4. Handle Encrypted Distribution Display
+    document.getElementById('showDistBtn').addEventListener('click', () => {
+        const normalizedCipher = normalizeText(cipherText);
+        const { frequencies } = calculateFrequency(normalizedCipher);
+        
+        cryptoFreqChart = drawChart(
+            'cryptoFreqChart', 
+            frequencies, 
+            'Ciphertext Frequency (%)', 
+            'rgba(255, 100, 50, 0.8)', // Red/Orange color for ciphertext
+            cryptoFreqChart
+        );
+        document.getElementById('decryptBtnAfterDist').style.display = 'block';
+        
+        // Scroll to the chart
+        document.getElementById('cryptoFreqChart').scrollIntoView({ behavior: 'smooth' });
     });
 
-    decryptBtnAfterDist.addEventListener('click', () => {
-        const shift = parseInt(shiftValue.value) || 3;
-        const decrypted = caesarDecrypt(cryptoOutput.textContent.replace('Encrypted Text: ', ''), shift);
-        cryptoOutput.textContent = `Decrypted Text: ${decrypted}`;
+    // 5. Handle Decryption Attack
+    document.getElementById('decryptBtnAfterDist').addEventListener('click', () => {
+        if (!cipherText) return;
+
+        const normalizedCipher = normalizeText(cipherText);
+        const { maxChar: cipherMaxFreqChar } = calculateFrequency(normalizedCipher);
+        
+        // Assumption: The most frequent letter in the source language is 'E' (index 4)
+        const TARGET_CHAR = 'E'; // 69 in ASCII, index 4
+        
+        const cipherCharCode = cipherMaxFreqChar.charCodeAt(0);
+        const targetCharCode = TARGET_CHAR.charCodeAt(0);
+
+        // Calculated Shift = (Position of Cipher Max - Position of Target Max) mod 26
+        let calculatedShift = (cipherCharCode - targetCharCode) % 26;
+        if (calculatedShift < 0) {
+            calculatedShift += 26; // Ensure positive shift (0-25)
+        }
+
+        // Decryption requires UN-shifting by the calculated key
+        const decryptionKey = 26 - calculatedShift;
+        const decryptedText = caesarCipher(cipherText, decryptionKey);
+
+        const outputDiv = document.getElementById('cryptoOutput');
+        
+        outputDiv.innerHTML = `
+            <h3>Frequency Attack Result:</h3>
+            <p><b>Most Frequent Letter in Ciphertext:</b> <span style="color:#ffcc00; font-weight:bold">${cipherMaxFreqChar}</span></p>
+            <p><b>Assumed Plaintext Letter (E):</b> <span style="color:#ffcc00; font-weight:bold">${TARGET_CHAR}</span></p>
+            <p><b>Calculated Attack Key (Shift Back):</b> <span style="color:#ffcc00; font-weight:bold">${decryptionKey}</span></p>
+            <p style="margin-top:15px;"><b>DECIPHERED TEXT:</b></p>
+            <div style="font-size:0.8rem; max-height: 200px; overflow-y: auto; color:#fff">${decryptedText}</div>
+        `;
+        outputDiv.scrollIntoView({ behavior: 'smooth' });
     });
 
-    function caesarEncrypt(text, shift) {
-        return text.split('')
-            .map(char => {
-                if (char.match(/[a-zA-Z]/)) {
-                    const base = char <= 'Z' ? 65 : 97;
-                    return String.fromCharCode(((char.charCodeAt(0) - base + shift) % 26) + base);
-                }
-                return char;
-            })
-            .join('');
+
+    // --- DYNAMIC BACKGROUND (Node Network / Correlations Effect) ---
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+    let nodes = [];
+    const numNodes = 80; // Number of data points/nodes
+    const maxDistance = 150; // Increased max distance for drawing a correlation line (wider net)
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    
+    function initNodes() {
+        nodes = [];
+        for (let i = 0; i < numNodes; i++) {
+            nodes.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                // Reduced subtle velocity for slower movement (0.02 instead of 0.2)
+                vx: (Math.random() - 0.5) * 0.02, 
+                vy: (Math.random() - 0.5) * 0.02,
+                size: Math.random() * 2 + 1,
+                color: 'rgba(255, 200, 0, 1)'
+            });
+        }
     }
 
-    function caesarDecrypt(text, shift) {
-        return text.split('')
-            .map(char => {
-                if (char.match(/[a-zA-Z]/)) {
-                    const base = char <= 'Z' ? 65 : 97;
-                    return String.fromCharCode(((char.charCodeAt(0) - base - shift + 26) % 26) + base);
-                }
-                return char;
-            })
-            .join('');
+    /** Draws a correlation line between two nodes if they are close enough. */
+    function drawConnections(node1, node2) {
+        const dx = node1.x - node2.x;
+        const dy = node1.y - node2.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < maxDistance) {
+            // Opacity is inversely proportional to distance (closer = stronger correlation)
+            const opacity = 1 - (dist / maxDistance);
+            ctx.beginPath();
+            // Made line color slightly more transparent (opacity * 0.2 instead of 0.4)
+            ctx.strokeStyle = `rgba(255, 200, 0, ${opacity * 0.2})`; 
+            ctx.lineWidth = opacity * 0.5;
+            ctx.moveTo(node1.x, node1.y);
+            ctx.lineTo(node2.x, node2.y);
+            ctx.stroke();
+        }
     }
+
+    let lastTime = 0;
+    function animate(currentTime) {
+        const deltaTime = currentTime - lastTime;
+        lastTime = currentTime;
+
+        ctx.fillStyle = '#050505';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < numNodes; i++) {
+            const node = nodes[i];
+            
+            // 1. Move Node
+            node.x += node.vx * deltaTime * 0.5;
+            node.y += node.vy * deltaTime * 0.5;
+            
+            // Boundary check (wrap around screen edge)
+            if (node.x < 0) node.x = canvas.width;
+            if (node.x > canvas.width) node.x = 0;
+            if (node.y < 0) node.y = canvas.height;
+            if (node.y > canvas.height) node.y = 0;
+
+            // 2. Draw Node
+            ctx.fillStyle = node.color;
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, node.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Subtle glow
+            ctx.shadowColor = 'rgba(255, 200, 0, 0.7)';
+            ctx.shadowBlur = 3; // Reduced blur intensity
+
+            // 3. Draw Connections to other nodes (representing correlations)
+            for (let j = i + 1; j < numNodes; j++) {
+                drawConnections(node, nodes[j]);
+            }
+        }
+        ctx.shadowBlur = 0; // Reset blur
+
+        requestAnimationFrame(animate);
+    }
+
+    // --- INITIALIZATION ---
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+        initNodes();
+    });
+
+    window.onload = function () {
+        resizeCanvas();
+        initNodes();
+        animate(0); // Start the animation loop
+    };
+
   </script>
 </body>
 </html>
