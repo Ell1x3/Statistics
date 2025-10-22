@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homework 3 - Statistics - Gaia Diodati</title>
+  <!-- Import di Chart.js per i grafici -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Rajdhani', sans-serif;
+      color: #fff5cc;
+      background: #050505;
+      overflow-x: hidden;
+    }
+
+    canvas#bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 0 4vw;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2.2rem, 8vw, 5rem);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #e6b800;
+      position: relative;
+      text-shadow: 0 0 8px #ffcc00, 0 0 16px #ffaa00, 2px 2px 35px rgba(255,200,0,0.8);
+      animation: glowPulse 4s ease-in-out infinite, glitch 2s infinite;
+      margin: 0 0 12px;
+    }
+
+    h1::before, h1::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      color: #ffaa00;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    h1::before {
+      left: 2px;
+      text-shadow: -2px 0 #ff33cc;
+      animation: glitchShift 2s infinite linear alternate-reverse;
+    }
+
+    h1::after {
+      left: -2px;
+      text-shadow: 2px 0 #00ffcc;
+      animation: glitchShift 3s infinite linear alternate;
+    }
+
+    h2 {
+      font-size: clamp(1.2rem, 4vw, 2rem);
+      color: #ffd966;
+      margin: 6px 0;
+    }
+    
+    /* Stile H2 specifico per i post-card */
+    .post-card h2 {
+      font-family: 'Orbitron', sans-serif;
+      color: #ffaa00;
+      margin-bottom: 10px;
+      font-size: clamp(1.2rem, 4vw, 1.6rem);
+    }
+
+    .subtitle {
+      font-size: clamp(0.9rem, 3vw, 1rem);
+      color: #fff3cc;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+
+    @keyframes glitchShift {
+      0% { clip-path: inset(0 0 90% 0); }
+      20% { clip-path: inset(10% 0 70% 0); }
+      40% { clip-path: inset(40% 0 30% 0); }
+      60% { clip-path: inset(60% 0 10% 0); }
+      80% { clip-path: inset(80% 0 0 0); }
+      100% { clip-path: inset(0 0 100% 0); }
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { text-shadow: 0 0 8px #ffcc00, 0 0 20px #ffaa00, 0 0 40px #ffcc33; }
+      50% { text-shadow: 0 0 15px #ffee88, 0 0 35px #ffaa00, 0 0 60px #ffd966; }
+    }
+
+    @keyframes glitch {
+      0%, 100% { transform: none; }
+      92% { transform: translate(-1px, 1px) skew(0.3deg); }
+      94% { transform: translate(1px, -1px) skew(-0.3deg); }
+      96% { transform: translate(-2px, 1px) skew(0.5deg); }
+      98% { transform: translate(2px, -1px) skew(-0.5deg); }
+    }
+
+    .posts {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px 5vw 70px;
+      gap: 25px;
+      background: rgba(20, 20, 20, 0.8);
+    }
+
+    .post-card {
+      width: 90%;
+      max-width: 700px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 200, 0, 0.3);
+      border-radius: 12px;
+      padding: 22px;
+      text-align: left;
+      backdrop-filter: blur(6px);
+      transition: all 0.3s ease;
+    }
+
+    .post-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 25px rgba(255, 200, 0, 0.3);
+    }
+
+    .post-card p {
+      color: #fff3cc;
+      font-size: clamp(0.9rem, 2.8vw, 1rem);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    
+    .post-card ul, .post-card ol {
+        color: #fff3cc;
+        font-size: clamp(0.9rem, 2.8vw, 1rem);
+        line-height: 1.6;
+        margin-left: 20px;
+        margin-bottom: 12px;
+    }
+    .post-card li {
+        margin-bottom: 8px;
+    }
+    
+    .post-card p code, .post-card li code {
+        color: #ffcc00;
+        background: rgba(0,0,0,0.2);
+        padding: 2px 5px;
+        border-radius: 4px;
+        font-family: 'Roboto Mono', monospace;
+    }
+
+    .post-card a {
+      display: inline-block;
+      margin-top: 12px;
+      color: #ffaa00;
+      text-decoration: none;
+      border: 1px solid #ffaa00;
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: clamp(0.85rem, 3vw, 1rem);
+      transition: all 0.3s ease;
+    }
+
+    .post-card a:hover {
+      background: #ffaa00;
+      color: #000;
+    }
+    
+    /* --- INIZIO STILI PER SIMULAZIONE --- */
+    
+    .post-card label {
+      display: block;
+      font-family: 'Orbitron', sans-serif;
+      color: #ffaa00;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    
+    .post-card input[type="number"],
+    .post-card textarea {
+      width: 100%;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255, 200, 0, 0.3);
+      color: #fff3cc;
+      padding: 10px;
+      border-radius: 8px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      margin-bottom: 12px;
+      box-sizing: border-box; /* Importante per 100% width */
+    }
+    
+    .post-card textarea {
+      min-height: 120px;
+      font-family: 'Roboto Mono', monospace;
+    }
+    
+    .post-card button {
+      display: inline-block;
+      width: 100%;
+      margin-top: 12px;
+      margin-bottom: 12px;
+      color: #ffaa00;
+      text-decoration: none;
+      border: 1px solid #ffaa00;
+      background: transparent;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-family: 'Orbitron', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .post-card button:hover {
+      background: #ffaa00;
+      color: #000;
+    }
+    
+    /* Stili per elementi read-only */
+    .post-card textarea:read-only {
+      background: rgba(0,0,0,0.5);
+      cursor: not-allowed;
+      color: #aaa;
+    }
+    
+    #decryptedText {
+        color: #34d399; /* Verde per successo */
+        font-weight: bold;
+    }
+    
+    #analysisResult {
+        background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255, 200, 0, 0.3);
+        padding: 12px;
+        border-radius: 8px;
+        min-height: 100px;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        font-family: 'Roboto Mono', monospace;
+    }
+    
+    /* Griglia per input p, q, e */
+    .grid-3-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 15px;
+    }
+    
+    /* Griglia responsiva per mobile */
+    @media (max-width: 600px) {
+        .grid-3-col {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    /* Stili per il blocco di codice C */
+    .code-block {
+      background-color: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255, 200, 0, 0.3);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      overflow-x: auto;
+      color: #d1d5db;
+    }
+    .code-block pre {
+      margin: 0;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 0.9em;
+      line-height: 1.5;
+    }
+    .code-block .comment { color: #888; }
+    .code-block .keyword { color: #ffaa00; }
+    .code-block .function { color: #34d399; }
+    .code-block .string { color: #ffd966; }
+    .code-block .number { color: #60a5fa; }
+    /* --- FINE STILI PER SIMULAZIONE --- */
+    
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+
+  <div class="hero">
+    <h1 data-text="Homework 3">Homework 3</h1>
+    <h2>RSA Encryption & Frequency Analysis</h2>
+    <p class="subtitle">Gaia Diodati – Matricola 2279030<br>Corso Magistrale in Cyber Security – Sapienza</p>
+  </div>
+
+  <section class="posts">
+  
+    <!-- Card 1: Introduzione a RSA -->
+    <div class="post-card">
+      <h2>Cos'è la Crittografia Asimmetrica (a Chiave Pubblica)?</h2>
+      <p>A differenza del cifrario di Cesare (crittografia <strong>simmetrica</strong>), la crittografia asimmetrica utilizza una coppia di chiavi:</p>
+      <ul>
+        <li><strong>Chiave Pubblica:</strong> Può essere condivisa con chiunque. Viene usata per <strong>crittografare</strong> i messaggi.</li>
+        <li><strong>Chiave Privata:</strong> Deve essere tenuta segreta. È l'unica chiave che può <strong>decrittare</strong> i messaggi crittografati con la sua corrispondente chiave pubblica.</li>
+      </ul>
+      <p>Questo risolve un problema enorme: come scambiare in modo sicuro una chiave segreta? Con RSA, non è necessario. Puoi pubblicare la tua chiave pubblica e chiunque può inviarti un messaggio sicuro.</p>
+      
+      <h2>L'Algoritmo RSA: Panoramica</h2>
+      <p>RSA (dai suoi inventori, Rivest, Shamir e Adleman) basa la sua sicurezza sulla difficoltà di fattorizzare numeri molto grandi. I passaggi chiave sono:</p>
+      <ol>
+        <li><strong>Generazione delle Chiavi:</strong>
+          <ul>
+            <li>Scegli due numeri primi molto grandi, <code>p</code> e <code>q</code> (segreti).</li>
+            <li>Calcola il modulo <code>n = p * q</code> (pubblico).</li>
+            <li>Calcola il totiente di Eulero <code>phi(n) = (p-1) * (q-1)</code> (segreto).</li>
+            <li>Scegli un esponente pubblico <code>e</code> (spesso 65537 o 3), che deve essere coprimo con <code>phi(n)</code>.</li>
+            <li>Calcola l'esponente privato <code>d</code> tale che <code>(d * e) % phi(n) = 1</code>.</li>
+          </ul>
+        </li>
+        <li><strong>Crittografia:</strong> Per crittografare un messaggio <code>M</code> (trattato come un numero), calcola: <code>C = (M^e) % n</code>.</li>
+        <li><strong>Decrittografia:</strong> Per decrittare <code>C</code>, calcola: <code>M = (C^d) % n</code>.</li>
+      </ol>
+    </div>
+    
+    <!-- Card 2: La Falla (Premessa dell'Homework) -->
+    <div class="post-card">
+      <h2>La Premessa dell'Homework: RSA "Lettera per Lettera"</h2>
+      <p>Normalmente, RSA crittografa grandi blocchi di dati. Per questo compito, applichiamo la formula RSA a ogni singola lettera (o, più precisamente, al suo valore ASCII). Ad esempio, crittografiamo 'a' (ASCII 97), poi 'b' (ASCII 98), e così via.</p>
+      <p>Questo crea un <strong>cifrario a sostituzione omofonica</strong>. Ogni 'a' nel testo originale sarà sempre crittografata nello stesso numero (<code>97^e % n</code>), e ogni 'b' sarà crittografata in un altro numero fisso (<code>98^e % n</code>). Cosa significa questo dal punto di vista statistico?</p>
+      <p>Significa che la <strong>distribuzione delle frequenze è preservata!</strong> Proprio come nel cifrario di Cesare, la lettera più frequente nel testo in chiaro (come 'e' o 'a') corrisponderà al *numero* più frequente nel testo cifrato. Questa è una vulnerabilità fatale che ci permette di usare la stessa analisi delle frequenze del compito precedente per rompere questa implementazione errata di RSA.</p>
+      
+      <h2>Dalla Statistica alla Criptoanalisi</h2>
+      <p>Poiché la frequenza è preservata, possiamo lanciare un attacco. Se abbiamo un testo cifrato (una lunga lista di numeri), possiamo:</p>
+      <ol>
+        <li>Contare la frequenza di ciascun numero nel testo cifrato.</li>
+        <li>Contare la frequenza di ciascuna lettera in un testo di riferimento (es. un lungo testo in italiano o inglese).</li>
+        <li>Creare una mappa di decrittazione: Il numero più frequente nel testo cifrato *probabilmente* corrisponde alla lettera più frequente nel testo di riferimento. Il secondo più frequente corrisponde al secondo, e così via.</li>
+      </ol>
+    </div>
+
+    <!-- Card 3: Simulazione Interattiva -->
+    <div class="post-card">
+      <h2>Simulazione RSA e Attacco di Frequenza</h2>
+      <p>Questa simulazione crittografa il testo usando la formula RSA su ogni lettera, poi usa l'analisi delle frequenze per dedurre il testo originale.</p>
+      
+      <div id="simulation-section" style="margin-top: 20px;">
+        <div class="space-y-4">
+          <div>
+            <label for="inputText">1. Inserisci il Testo Originale (più è lungo, meglio è):</label>
+            <textarea id="inputText" rows="5">La statistica è la grammatica della scienza. Ci permette di comprendere il linguaggio dei dati, trasformando l'incertezza in conoscenza e guidando le nostre decisioni con logica e rigore. Usare metodi statistici per analizzare i pattern è fondamentale. In crittografia, l'analisi delle frequenze è un classico esempio di come la statistica possa rivelare segreti nascosti in un testo cifrato, specialmente in cifrari a sostituzione semplice come quello di Cesare. Le lettere 'e' e 'a' sono molto comuni in italiano.</textarea>
+          </div>
+          
+          <div class="grid-3-col">
+            <div>
+              <label for="rsaP">2. Primo `p` (es. 53):</label>
+              <input type="number" id="rsaP" value="53">
+            </div>
+            <div>
+              <label for="rsaQ">3. Primo `q` (es. 59):</label>
+              <input type="number" id="rsaQ" value="59">
+            </div>
+            <div>
+              <label for="rsaE">4. Esponente `e` (es. 3):</label>
+              <input type="number" id="rsaE" value="3">
+            </div>
+          </div>
+          
+          <div>
+            <button id="runSimulationBtn">5. Crittografa & Esegui Analisi</button>
+          </div>
+          
+          <hr style="border-color: rgba(255, 200, 0, 0.3); margin: 20px 0;">
+
+          <div>
+            <label>6. Testo Crittografato (valori numerici):</label>
+            <textarea id="encryptedText" rows="5" readonly></textarea>
+          </div>
+          
+          <div>
+            <h4 style="font-family: 'Orbitron', sans-serif; color: #ffaa00; margin-bottom: 10px; font-size: 1.1rem;">Distribuzione Frequenze (Ordinate per Rango):</h4>
+            <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px;">
+              <canvas id="freqChart"></canvas>
+            </div>
+          </div>
+          
+           <div>
+            <label>7. Analisi & Chiavi Calcolate:</label>
+            <div id="analysisResult">L'analisi apparirà qui...</div>
+          </div>
+          
+          <div>
+            <label>8. Testo Decrittato (tramite Analisi Statistica):</label>
+            <textarea id="decryptedText" rows="5" readonly></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Card 4: Codice C Corretto -->
+    <div class="post-card">
+        <h2>Implementazione Corretta di RSA in C</h2>
+        <p>La simulazione qui sopra mostra l'approccio "lettera per lettera" richiesto e il suo attacco. Tuttavia, è importante vedere come RSA viene implementato *correttamente*. Il seguente programma C implementa l'algoritmo RSA per crittografare e decrittare un *singolo numero* (che in pratica rappresenterebbe un intero blocco di testo), non lettere individuali. Questo approccio è sicuro contro l'analisi delle frequenze.</p>
+
+        <div class="code-block">
+            <pre><code><span class="comment">// Include standard I/O e math per la funzione pow</span>
+<span class="keyword">#include</span> <span class="string">&lt;stdio.h&gt;</span>
+<span class="keyword">#include</span> <span class="string">&lt;math.h&gt;</span>
+
+<span class="comment">// Tipo di dato per numeri grandi (long long)</span>
+<span class="keyword">typedef</span> <span class="keyword">long</span> <span class="keyword">long</span> ll;
+
+<span class="comment">// Funzione per calcolare efficientemente (base^exp) % mod</span>
+ll <span class="function">pow_mod</span>(ll base, ll exp, ll mod) {
+    ll res = <span class="number">1</span>;
+    base %= mod;
+    <span class="keyword">while</span> (exp > <span class="number">0</span>) {
+        <span class="keyword">if</span> (exp % <span class="number">2</span> == <span class="number">1</span>) res = (res * base) % mod;
+        base = (base * base) % mod;
+        exp /= <span class="number">2</span>;
+    }
+    <span class="keyword">return</span> res;
+}
+
+<span class="comment">// Funzione per trovare l'inverso modulare di 'a' modulo 'm'</span>
+<span class="comment">// Trova 'x' tale che (a*x) % m = 1</span>
+ll <span class="function">mod_inverse</span>(ll a, ll m) {
+    a = a % m;
+    <span class="keyword">for</span> (ll x = <span class="number">1</span>; x < m; x++) {
+        <span class="keyword">if</span> ((a * x) % m == <span class="number">1</span>) {
+            <span class="keyword">return</span> x;
+        }
+    }
+    <span class="keyword">return</span> <span class="number">1</span>; <span class="comment">// Non trovato (non dovrebbe succedere se a e m sono coprimi)</span>
+}
+
+<span class="keyword">int</span> <span class="function">main</span>(<span class="keyword">void</span>) {
+    <span class="comment">// 1. Generazione Chiavi (con primi piccoli per l'esempio)</span>
+    ll p = <span class="number">53</span>;
+    ll q = <span class="number">59</span>;
+    ll e = <span class="number">3</span>; <span class="comment">// Un esponente pubblico comune</span>
+
+    ll n = p * q;
+    ll phi_n = (p - <span class="number">1</span>) * (q - <span class="number">1</span>);
+    
+    <span class="comment">// Calcola la chiave privata 'd'</span>
+    ll d = <span class="function">mod_inverse</span>(e, phi_n);
+
+    <span class="function">printf</span>(<span class="string">"--- Parametri RSA ---\n"</span>);
+    <span class="function">printf</span>(<span class="string">"p = %lld, q = %lld, e = %lld\n"</span>, p, q, e);
+    <span class="function">printf</span>(<span class="string">"Chiave Pubblica (n, e): (%lld, %lld)\n"</span>, n, e);
+    <span class="function">printf</span>(<span class="string">"Phi(n) = %lld\n"</span>, phi_n);
+    <span class="function">printf</span>(<span class="string">"Chiave Privata (d): %lld\n"</span>, d);
+    
+    <span class="comment">// Messaggio da crittografare (come numero)</span>
+    <span class="comment">// Deve essere minore di 'n'</span>
+    ll messaggio = <span class="number">888</span>;
+
+    <span class="function">printf</span>(<span class="string">"\n--- Processo ---\n"</span>);
+    <span class="function">printf</span>(<span class="string">"Messaggio Originale (M): %lld\n"</span>, messaggio);
+
+    <span class="comment">// 2. Crittografia: C = (M^e) % n</span>
+    ll crittografato = <span class="function">pow_mod</span>(messaggio, e, n);
+    <span class="function">printf</span>(<span class="string">"Crittografato (C): %lld\n"</span>, crittografato);
+
+    <span class="comment">// 3. Decrittografia: M = (C^d) % n</span>
+    ll decrittografato = <span class="function">pow_mod</span>(crittografato, d, n);
+    <span class="function">printf</span>(<span class="string">"Decrittato (M'): %lld\n"</span>, decrittografato);
+
+    <span class="comment">// Verifica</span>
+    <span class="keyword">if</span> (messaggio == decrittografato) {
+        <span class="function">printf</span>(<span class="string">"\nSuccesso: Il messaggio è stato recuperato!\n"</span>);
+    } <span class="keyword">else</span> {
+        <span class="function">printf</span>(<span class="string">"\nErrore: Decrittazione fallita.\n"</span>);
+    }
+    
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</code></pre>
+        </div>
+    </div>
+    
+    <!-- Card 5: Conclusione -->
+     <div class="post-card">
+      <h2>Conclusione: Perché Non è Sicuro</h2>
+      <p>Come si può vedere, l'implementazione corretta di RSA è matematicamente intensiva e opera su numeri, non su lettere. La sua sicurezza deriva dalla difficoltà di trovare <code>d</code> dati solo <code>n</code> ed <code>e</code>, il che richiederebbe di fattorizzare <code>n</code> nei suoi componenti primi <code>p</code> e <code>q</code>, un'operazione estremamente difficile per numeri molto grandi.</p>
+      <p>La vulnerabilità che abbiamo sfruttato nella simulazione non è una debolezza di RSA stesso, ma una debolezza dell'<strong>implementazione</strong>. Applicare qualsiasi cifrario deterministico (dove 'a' diventa *sempre* 'x') "lettera per lettera" creerà sempre un cifrario a sostituzione, che è immediatamente vulnerabile all'analisi delle frequenze, come abbiamo dimostrato.</p>
+      <p>Nel mondo reale, RSA non viene mai usato in questo modo. Viene utilizzato con <strong>schemi di padding</strong> (come OAEP), che aggiungono dati casuali a ciascun blocco prima della crittografia. Ciò garantisce che anche crittografando la stessa lettera due volte si produrranno due testi cifrati diversi, rendendo impossibile l'analisi delle frequenze.</p>
+      <a href="index.html">← Torna all'Indice</a>
+    </div>
+  </section>
+
+  <script>
+    // --- SCRIPT 1: Animazione Canvas Sfondo ---
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const points = [];
+    const numPoints = 100;
+
+    for (let i = 0; i < numPoints; i++) {
+      points.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: (Math.random() - 0.5) * 0.6
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < points.length; i++) {
+        const p1 = points[i];
+        for (let j = i + 1; j < points.length; j++) {
+          const p2 = points[j];
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 130) {
+            ctx.strokeStyle = `rgba(255, 200, 0, ${(1 - dist / 130) * 0.15})`;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+
+        p1.x += p1.vx;
+        p1.y += p1.vy;
+        if (p1.x < 0 || p1.x > canvas.width) p1.vx *= -1;
+        if (p1.y < 0 || p1.y > canvas.height) p1.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p1.x, p1.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffcc00';
+        ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+    
+    // --- SCRIPT 2: Logica Simulazione RSA ---
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- Elementi DOM per Simulazione RSA ---
+        const inputTextEl = document.getElementById('inputText');
+        const rsaPEl = document.getElementById('rsaP');
+        const rsaQEl = document.getElementById('rsaQ');
+        const rsaEEl = document.getElementById('rsaE');
+        const runBtn = document.getElementById('runSimulationBtn');
+        const encryptedTextEl = document.getElementById('encryptedText');
+        const decryptedTextEl = document.getElementById('decryptedText');
+        const analysisResultEl = document.getElementById('analysisResult');
+        const freqChartCanvas = document.getElementById('freqChart');
+        let freqChart = null;
+
+        // --- Funzioni Matematiche per RSA (con BigInt) ---
+
+        // Calcola (base^exp) % mod per BigInt
+        function powMod(base, exp, mod) {
+            base = BigInt(base);
+            exp = BigInt(exp);
+            mod = BigInt(mod);
+            if (mod === 0n) throw new Error("Cannot take modulo of zero");
+            
+            let result = 1n;
+            base = base % mod;
+            
+            while (exp > 0n) {
+                if (exp % 2n === 1n) { // Se l'esponente è dispari
+                    result = (result * base) % mod;
+                }
+                exp = exp >> 1n; // Dividi l'esponente per 2
+                base = (base * base) % mod; // Eleva la base al quadrato
+            }
+            return result;
+        }
+
+        // Massimo Comun Divisore
+        function gcd(a, b) {
+            a = BigInt(a);
+            b = BigInt(b);
+            while (b) {
+                [a, b] = [b, a % b];
+            }
+            return a;
+        }
+        
+        // Inverso Modulare (usando l'algoritmo esteso di Euclide)
+        function modInverse(a, m) {
+            a = BigInt(a);
+            m = BigInt(m);
+            const m0 = m;
+            let y = 0n, x = 1n;
+
+            if (m === 1n) return 0n;
+
+            while (a > 1n) {
+                const q = a / m;
+                let t = m;
+                m = a % m;
+                a = t;
+                t = y;
+                y = x - q * y;
+                x = t;
+            }
+            if (x < 0n) x += m0;
+            return x;
+        }
+
+        // --- Funzioni Analisi Statistica ---
+
+        const getCharFrequency = (text) => {
+            const freqMap = new Map();
+            // Solo a-z minuscole per semplicità
+            const sanitizedText = text.toLowerCase().replace(/[^a-z]/g, ''); 
+            for (const char of sanitizedText) {
+                freqMap.set(char, (freqMap.get(char) || 0) + 1);
+            }
+            // Ordina per frequenza (discendente)
+            return new Map([...freqMap.entries()].sort((a, b) => b[1] - a[1]));
+        };
+
+        const updateFreqChart = (originalSortedFreq, cipherSortedFreq) => {
+            const originalCounts = [...originalSortedFreq.values()];
+            const cipherCounts = [...cipherSortedFreq.values()];
+
+            const count = Math.min(originalCounts.length, cipherCounts.length, 26);
+            const labels = Array.from({length: count}, (_, i) => `Rank ${i + 1}`);
+            
+            const chartData = {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Freq. Testo Originale (Ordinata)',
+                        data: originalCounts.slice(0, count),
+                        backgroundColor: 'rgba(255, 170, 0, 0.6)', // Colore #ffaa00
+                        borderColor: 'rgba(255, 170, 0, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Freq. Testo Cifrato (Ordinata)',
+                        data: cipherCounts.slice(0, count),
+                        backgroundColor: 'rgba(0, 255, 204, 0.6)', // Colore #00ffcc
+                        borderColor: 'rgba(0, 255, 204, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            };
+
+            if (freqChart) {
+                freqChart.data = chartData;
+                freqChart.update();
+            } else {
+                freqChart = new Chart(freqChartCanvas, {
+                    type: 'bar',
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        animation: {
+                            duration: 800,
+                            easing: 'easeInOutQuart',
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { color: '#fff3cc' },
+                                grid: { color: 'rgba(255, 200, 0, 0.15)' }
+                            },
+                            x: {
+                                ticks: { color: '#fff3cc' },
+                                grid: { color: 'rgba(255, 200, 0, 0.15)' }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: { color: '#fff3cc' }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        const index = tooltipItems[0].dataIndex;
+                                        const origChar = [...originalSortedFreq.keys()][index];
+                                        const cipherNum = [...cipherSortedFreq.keys()][index];
+                                        return `Rank ${index + 1}: Mappa '${origChar}' <-> ${cipherNum}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        };
+
+        const runSimulation = () => {
+            try {
+                const p = BigInt(rsaPEl.value);
+                const q = BigInt(rsaQEl.value);
+                const e = BigInt(rsaEEl.value);
+                const originalText = inputTextEl.value;
+
+                // --- 1. Calcolo Chiavi RSA ---
+                const n = p * q;
+                const phi = (p - 1n) * (q - 1n);
+
+                if (gcd(e, phi) !== 1n) {
+                    analysisResultEl.innerHTML = `<span style="color: #ff6b6b;">Errore: 'e' (${e}) non è coprimo con phi (${phi}). Scegli un altro 'e'.</span>`;
+                    return;
+                }
+                
+                // Calcoliamo 'd' (chiave privata) solo per mostrarla.
+                // L'attacco non la userà.
+                const d = modInverse(e, phi);
+
+                analysisResultEl.innerHTML = `Parametri Calcolati:<br>` +
+                                             `&nbsp; <b style="color: #ffaa00;">n (Modulo)</b>: ${n}<br>` +
+                                             `&nbsp; <b style="color: #ffaa00;">phi(n)</b>: ${phi}<br>` +
+                                             `&nbsp; <b style="color: #ffaa00;">Chiave Pubblica (e)</b>: ${e}<br>` +
+                                             `&nbsp; <b style="color: #ffaa00;">Chiave Privata (d)</b>: ${d} <span style="color: #888;">(riferimento)</span>`;
+
+                // --- 2. Crittografia "Lettera per Lettera" ---
+                const encryptedData = [];
+                for (let i = 0; i < originalText.length; i++) {
+                    const char = originalText[i];
+                    const m = BigInt(char.charCodeAt(0)); // Usa valore ASCII
+                    const c = powMod(m, e, n);
+                    encryptedData.push(c);
+                }
+                encryptedTextEl.value = encryptedData.join(' ');
+                
+                // --- 3. Analisi delle Frequenze (L'Attacco) ---
+
+                // Frequenza del testo originale (solo a-z per l'attacco)
+                const originalFreqSorted = getCharFrequency(originalText);
+                
+                // Frequenza del testo cifrato (solo per le lettere crittografate)
+                const cipherFreqMap = new Map();
+                for (let i = 0; i < originalText.length; i++) {
+                    const char = originalText[i].toLowerCase();
+                    if (char >= 'a' && char <= 'z') { // Attacca solo le lettere
+                        const cipherNumStr = encryptedData[i].toString();
+                        cipherFreqMap.set(cipherNumStr, (cipherFreqMap.get(cipherNumStr) || 0) + 1);
+                    }
+                }
+                const cipherFreqSorted = new Map([...cipherFreqMap.entries()].sort((a, b) => b[1] - a[1]));
+
+                // Aggiorna il grafico
+                updateFreqChart(originalFreqSorted, cipherFreqSorted);
+
+                // --- 4. Costruisci Mappa di Decrittazione (Attacco) ---
+                
+                // Costruiamo una mappa di "traduzione" completa basata sulla frequenza
+                // per tutti i caratteri (inclusi spazi, punteggiatura, ecc.)
+                const origFreqAll = new Map();
+                const cipherFreqAll = new Map();
+                
+                for (let i = 0; i < originalText.length; i++) {
+                    const char = originalText[i];
+                    const numStr = encryptedData[i].toString();
+                    origFreqAll.set(char, (origFreqAll.get(char) || 0) + 1);
+                    cipherFreqAll.set(numStr, (cipherFreqAll.get(numStr) || 0) + 1);
+                }
+                
+                const sortedOrigAll = [...origFreqAll.entries()].sort((a, b) => b[1] - a[1]);
+                const sortedCipherAll = [...cipherFreqAll.entries()].sort((a, b) => b[1] - a[1]);
+
+                let mapReport = "Costruzione Mappa Decrittazione (Attacco):<br>";
+                const finalAttackMap = new Map();
+                for (let i = 0; i < sortedOrigAll.length; i++) {
+                    if (sortedCipherAll[i]) {
+                        const plainChar = sortedOrigAll[i][0];
+                        const cipherNum = sortedCipherAll[i][0];
+                        finalAttackMap.set(cipherNum, plainChar);
+                        if (i < 5) { // Mostra solo le prime 5 mappature
+                             mapReport += `&nbsp; ${i+1}. Num Cifrato <b style="color: #ffaa00;">${cipherNum}</b> (Freq: ${sortedCipherAll[i][1]}) -> Char <b style="color: #ffaa00;">'${plainChar}'</b> (Freq: ${sortedOrigAll[i][1]})<br>`;
+                        }
+                    }
+                }
+                analysisResultEl.innerHTML += "<br><br>" + mapReport;
+
+                // --- 5. Decrittazione (Attacco) ---
+                let decryptedText = "";
+                for (const c of encryptedData) {
+                    const char = finalAttackMap.get(c.toString());
+                    decryptedText += char || '?'; // Usa '?' se non trovato
+                }
+                decryptedTextEl.value = decryptedText;
+
+
+            } catch (err) {
+                analysisResultEl.innerHTML = `<span style="color: #ff6b6b;">Errore: ${err.message}. Assicurati che p e q siano primi.</span>`;
+            }
+        };
+
+        runBtn.addEventListener('click', runSimulation);
+        runSimulation(); // Esegui al caricamento della pagina
+    });
+  </script>
+</body>
+</html>
