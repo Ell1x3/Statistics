@@ -324,7 +324,7 @@
             <li>Choose two very large prime numbers, <code>p</code> and <code>q</code> (secret).</li>
             <li>Calculate the modulus <code>n = p * q</code> (public).</li>
             <li>Calculate Euler's totient function <code>phi(n) = (p-1) * (q-1)</code> (secret).</li>
-            <li>Choose a public exponent <code>e</code> (often 65537 or 3), which must be coprime with <code>phi(n)</code>.</li>
+            <li>Choose a public exponent <code>e</code>, which must be coprime with <code>phi(n)</code>.</li>
             <li>Calculate the private exponent <code>d</code> such that <code>(d * e) % phi(n) = 1</code>.</li>
           </ul>
         </li>
@@ -406,7 +406,7 @@
     </div>
     
     <div class="post-card">
-      <h2>Correct RSA Implementation in C</h2>
+      <h2>RSA Implementation in C</h2>
       <p>The simulation above demonstrates the required "letter-by-letter" approach and its attack. However, it's important to see how RSA is implemented *correctly*. The following C program implements the RSA algorithm to encrypt and decrypt a *single number* (which would practically represent an entire block of text), not individual letters. This approach is secure against frequency analysis.</p>
 
       <div class="code-block">
