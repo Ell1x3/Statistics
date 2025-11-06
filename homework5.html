@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homework 5 - Statistics - Gaia Diodati</title>
+  <style>
+    /* Riempi qui lo stesso identico blocco <style> del tuo index.html */
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Rajdhani', sans-serif;
+      color: #fff5cc;
+      background: #050505;
+      overflow-x: hidden;
+    }
+
+    canvas#bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .hero {
+      min-height: 50vh; /* Ridotto per lasciare spazio ai contenuti */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 0 4vw;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2.2rem, 8vw, 5rem);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #e6b800;
+      position: relative;
+      text-shadow: 0 0 8px #ffcc00, 0 0 16px #ffaa00, 2px 2px 35px rgba(255,200,0,0.8);
+      animation: glowPulse 4s ease-in-out infinite, glitch 2s infinite;
+      margin: 0 0 12px;
+    }
+
+    h1::before, h1::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      color: #ffaa00;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    h1::before {
+      left: 2px;
+      text-shadow: -2px 0 #ff33cc;
+      animation: glitchShift 2s infinite linear alternate-reverse;
+    }
+
+    h1::after {
+      left: -2px;
+      text-shadow: 2px 0 #00ffcc;
+      animation: glitchShift 3s infinite linear alternate;
+    }
+
+    h2 {
+      font-size: clamp(1.2rem, 4vw, 2rem);
+      color: #ffd966;
+      margin: 6px 0;
+    }
+
+    .subtitle {
+      font-size: clamp(0.9rem, 3vw, 1rem);
+      color: #fff3cc;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+
+    @keyframes glitchShift {
+      0% { clip-path: inset(0 0 90% 0); }
+      20% { clip-path: inset(10% 0 70% 0); }
+      40% { clip-path: inset(40% 0 30% 0); }
+      60% { clip-path: inset(60% 0 10% 0); }
+      80% { clip-path: inset(80% 0 0 0); }
+      100% { clip-path: inset(0 0 100% 0); }
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { text-shadow: 0 0 8px #ffcc00, 0 0 20px #ffaa00, 0 0 40px #ffcc33; }
+      50% { text-shadow: 0 0 15px #ffee88, 0 0 35px #ffaa00, 0 0 60px #ffd966; }
+    }
+
+    @keyframes glitch {
+      0%, 100% { transform: none; }
+      92% { transform: translate(-1px, 1px) skew(0.3deg); }
+      94% { transform: translate(1px, -1px) skew(-0.3deg); }
+      96% { transform: translate(-2px, 1px) skew(0.5deg); }
+      98% { transform: translate(2px, -1px) skew(-0.5deg); }
+    }
+
+    .posts {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px 5vw 70px;
+      gap: 25px;
+      background: rgba(20, 20, 20, 0.8);
+    }
+
+    .post-card {
+      width: 90%;
+      max-width: 900px; /* Aumentato per i contenuti */
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 200, 0, 0.3);
+      border-radius: 12px;
+      padding: 22px;
+      text-align: left;
+      backdrop-filter: blur(6px);
+      transition: all 0.3s ease;
+    }
+
+    .post-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 25px rgba(255, 200, 0, 0.3);
+    }
+
+    .post-card h2 {
+      font-family: 'Orbitron', sans-serif;
+      color: #ffaa00;
+      margin-bottom: 10px;
+      font-size: clamp(1.2rem, 4vw, 1.6rem);
+    }
+    
+    .post-card h3 { /* Nuovo stile per sottosezioni */
+      font-family: 'Orbitron', sans-serif;
+      color: #ffd966;
+      margin-top: 25px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 200, 0, 0.2);
+      padding-bottom: 5px;
+      font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+    }
+
+    .post-card p, .post-card ul, .post-card ol {
+      color: #fff3cc;
+      font-size: clamp(0.9rem, 2.8vw, 1rem);
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .post-card a.back-button {
+      display: inline-block;
+      margin-top: 25px;
+      color: #000;
+      background: #ffaa00;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: clamp(0.9rem, 3vw, 1.1rem);
+      transition: all 0.3s ease;
+    }
+
+    .post-card a.back-button:hover {
+      background: #ffd966;
+    }
+    
+    /* Stile specifico per equazioni o blocchi di codice */
+    .post-card pre {
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 200, 0, 0.1);
+        padding: 15px;
+        border-radius: 8px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+    }
+    .post-card code {
+        font-family: monospace;
+        color: #00ffcc;
+    }
+
+  </style>
+  
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+      MathJax = {
+          tex: {
+              inlineMath: [['$', '$'], ['\\(', '\\)']] // Rende le formule inline riconoscibili da $...$
+          }
+      };
+  </script>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+
+  <div class="hero">
+    <h1 data-text="Homework 5">Homework 5</h1>
+    <h2>Measures of Position and Central Tendency</h2>
+    <p class="subtitle">Gaia Diodati – Statistics Course</p>
+  </div>
+
+  <section class="posts">
+    <div class="post-card">
+      <h2>Measures of Central Tendency: Mean, Median, and Mode</h2>
+      <p>
+        Measures of central tendency summarize the position of a statistical distribution by replacing the collected data with a single real value that effectively represents the phenomenon in its globality and summarizes its most important aspects. It is a significant index of the dataset that expresses the position around which the population clusters. Essentially, these measures allow for a description of the order of magnitude of a given phenomenon and its comparison with others.
+      </p>
+    </div>
+  
+    <div class="post-card">
+      <h2>🔍 Observing Reality</h2>
+      <p>
+        Let's imagine we want to compare the performance of students from three classes after a test.
+      </p>
+      <p>
+        The mere act of collecting the grades of each student in a table does not allow for immediate analysis: it would be more convenient to have a <strong><em>single datum</em></strong> that represents the class's performance.
+      </p>
+      <p>
+        A value of this type is called a <strong><em>measure of central tendency</em></strong> (or measure of position), and in Statistics, the most important measures of central tendency are precisely the <strong><em>mean</em></strong>, <strong><em>mode</em></strong>, and <strong><em>median</em></strong>.
+      </p>
+      <p>
+        We can say that the mean, mode, and median are measures of position that allow, based on the requirements, for a synthetic expression of the results of a <strong><em>statistical investigation</em></strong>.
+      </p>
+      <p>
+        Specifically, the <strong><em>mean</em></strong>, <strong><em>mode</em></strong>, and <strong><em>median</em></strong> are three characteristics of any dataset:
+      </p>
+      <ul>
+        <li>
+          The <strong><em>mean</em></strong> is the ratio between the sum of the numerical data and the number of data points;
+        </li>
+        <li>
+          The <strong><em>median</em></strong> is the central value among the numerical data;
+        </li>
+        <li>
+          The <strong><em>mode</em></strong> is the value that appears with the highest frequency among the data.
+        </li>
+      </ul>
+    </div>
+
+    <div class="post-card">
+      <h2>📈 Analyzing the Score Distributions</h2>
+      <p>
+        To truly understand the utility of central tendency measures, let's analyze the performance (represented by Scores on a 1-10 scale) of three different student groups: 5A, 5B, and 5C.
+      </p>
+      
+      <div style="display: flex; justify-content: space-around; flex-wrap: wrap; margin-top: 20px;">
+        
+        <div style="flex-basis: 30%; min-width: 200px; margin: 10px; padding: 10px; border: 2px solid #CC33CC; border-radius: 12px; box-shadow: 0 0 10px #CC33CC55;"> 
+          <h3 style="color: #ffaa00; text-align: center; font-family: 'Orbitron', sans-serif;">Class 5A Scores</h3>
+          <table style="width: 100%; border-collapse: collapse; font-family: 'Rajdhani', sans-serif;">
+            <thead style="background: #CC33CC1A;">
+              <tr>
+                <th style="padding: 10px; border: 1px solid #CC33CC; color: #ffaa00;">Student</th>
+                <th style="padding: 10px; border: 1px solid #CC33CC; color: #ffaa00;">Score (1-10)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="padding: 8px; border: 1px solid #CC33CC; color: #00ffcc;">S1</td><td style="padding: 8px; border: 1px solid #CC33CC; text-align: center;">8</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #CC33CC; color: #00ffcc;">S2</td><td style="padding: 8px; border: 1px solid #CC33CC; text-align: center;">6</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #CC33CC; color: #00ffcc;">S3</td><td style="padding: 8px; border: 1px solid #CC33CC; text-align: center;">9</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #CC33CC; color: #00ffcc;">S4</td><td style="padding: 8px; border: 1px solid #CC33CC; text-align: center;">7</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #CC33CC; color: #00ffcc;">S5</td><td style="padding: 8px; border: 1px solid #CC33CC; text-align: center;">8</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="flex-basis: 30%; min-width: 200px; margin: 10px; padding: 10px; border: 2px solid #CC33CC; border-radius: 12px; box-shadow: 0 0 10px #CC33CC55;">
+          <h3 style="color: #ffaa00; text-align: center; font-family: 'Orbitron', sans-serif;">Class 5B Scores</h3>
+          <table style="width: 100%; border-collapse: collapse; font-family: 'Rajdhani', sans-serif;">
+            <thead style="background: #CC33CC1A;">
+              <tr>
+                <th style="padding: 10px; border: 1px solid #CC33CC; color: #ffaa00;">Student</th>
+                <th style="padding: 10px; border: 1px solid #CC33CC; color: #ffaa00;">Score (1-10)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="padding: 8px; border: 1px solid #CC33CC; color: #00ffcc;">S1</td><td style="padding: 8px; border: 1px solid #CC33CC; text-align: center;">2</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #CC33CC; color: #00ffcc;">S2</td><td style="padding: 8px; border: 1px solid #CC33CC; text-align: center;">10</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #CC33CC; color: #00ffcc;">S3</td><td style="padding: 8px; border: 1px solid #CC33CC; text-align: center;">6</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #CC33CC; color: #00ffcc;">S4</td><td style="padding: 8px; border: 1px solid #CC33CC; text-align: center;">10</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #CC33CC; color: #00ffcc;">S5</td><td style="padding: 8px; border: 1px solid #CC33CC; text-align: center;">2</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="flex-basis: 30%; min-width: 200px; margin: 10px; padding: 10px; border: 2px solid #CC33CC; border-radius: 12px; box-shadow: 0 0 10px #CC33CC55;">
+          <h3 style="color: #ffaa00; text-align: center; font-family: 'Orbitron', sans-serif;">Class 5C Scores</h3>
+          <table style="width: 100%; border-collapse: collapse; font-family: 'Rajdhani', sans-serif;">
+            <thead style="background: #CC33CC1A;">
+              <tr>
+                <th style="padding: 10px; border: 1px solid #CC33CC; color: #ffaa00;">Student</th>
+                <th style="padding: 10px; border: 1px solid #CC33CC; color: #ffaa00;">Score (1-10)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="padding: 8px; border: 1px solid #CC33CC; color: #00ffcc;">S1</td><td style="padding: 8px; border: 1px solid #CC33CC; text-align: center;">7</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #CC33CC; color: #00ffcc;">S2</td><td style="padding: 8px; border: 1px solid #CC33CC; text-align: center;">7</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #CC33CC; color: #00ffcc;">S3</td><td style="padding: 8px; border: 1px solid #CC33CC; text-align: center;">7</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #CC33CC; color: #00ffcc;">S4</td><td style="padding: 8px; border: 1px solid #CC33CC; text-align: center;">7</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #CC33CC; color: #00ffcc;">S5</td><td style="padding: 8px; border: 1px solid #CC33CC; text-align: center;">7</td></tr>
+            </tbody>
+          </table>
+        </div>
+        
+      </div>
+
+      <p style="margin-top: 20px;">
+        These three distributions demonstrate different characteristics. In the next step, we will use the <em>Mean</em>, <em>Median</em>, and <em>Mode</em> to compare them effectively.
+      </p>
+    </div>
+
+    <div class="post-card">
+      <h2>🧠 The Mean ($\bar{x}$) - The Arithmetic Average</h2>
+      <p>
+        The Mean, or arithmetic average, is the most common measure of central tendency. It is calculated by <strong><em>summing all the values</em></strong> in a dataset and then <strong><em>dividing by the total number of values</em></strong>. It utilizes every value in the distribution.
+      </p>
+
+      <h3>Formula:</h3>
+      <p>
+        The formula for the sample mean ($\bar{x}$) is the sum of all scores ($x_i$) divided by the number of scores ($n$):
+      </p>
+      <p style="text-align: center; font-family: 'Orbitron', sans-serif; font-size: 1.6rem; color: #00ffcc;">
+        $\bar{x} = \frac{\sum_{i=1}^{n} x_i}{n}$
+      </p>
+
+      <h3>Analysis of Class Scores:</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+        <thead style="background: #ffaa0015;">
+          <tr>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #ffaa00;">Class</th>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #ffaa00;">Scores ($x_i$)</th>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #00ffcc;">Calculated Mean ($\bar{x}$)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5A</td><td style="padding: 8px; border: 1px solid #ffaa0066;">8, 6, 9, 7, 8</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">7.6</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5B</td><td style="padding: 8px; border: 1px solid #ffaa0066;">2, 10, 6, 10, 2</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">6.0</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5C</td><td style="padding: 8px; border: 1px solid #ffaa0066;">7, 7, 7, 7, 7</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">7.0</td></tr>
+        </tbody>
+      </table>
+      
+      <h3>Strengths and Weaknesses:</h3>
+      <ul>
+        <li>
+          <strong style="color: #00ffcc;">Strength:</strong> It is mathematically rigorous and takes into account the value of every single observation, making it the best representation of the dataset's center when data are symmetrical.
+        </li>
+        <li>
+          <strong style="color: #FF00FF;">Weakness (Robustness):</strong> The Mean is <strong><em>highly susceptible to extreme values (outliers)</em></strong>. Notice in <strong>Class 5B</strong>, the low scores (2, 2) and high scores (10, 10) balance out, giving a misleading Mean of 6.0, even though no student achieved that score. Thus, the mean is <strong><em>not robust</em></strong> to skewed or polarized data.
+        </li>
+      </ul>
+    </div>
+    
+    <div class="post-card">
+      <h2>🔮 The Median ($Me$) - The Central Value</h2>
+      <p>
+        The Median is the <strong><em>midpoint value</em></strong> of a dataset when the data is arranged in ascending or descending order. It divides the distribution into two equal halves (50% above and 50% below).
+      </p>
+
+      <h3>Formula:</h3>
+      <p>
+        To find the median, first order the $n$ scores. The median position is found using:
+      </p>
+      <p style="text-align: center; font-family: 'Orbitron', sans-serif; font-size: 1.6rem; color: #00ffcc;">
+        $\text{Position} = \frac{n+1}{2}$
+      </p>
+      <ul style="padding-left: 20px;">
+        <li>If $n$ is <strong><em>odd</em></strong>, $Me$ is the value at the calculated position.</li>
+        <li>If $n$ is <strong><em>even</em></strong>, $Me$ is the average of the two central values (at positions $n/2$ and $(n/2)+1$).</li>
+      </ul>
+
+      <h3>Analysis of Class Scores:</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+        <thead style="background: #ffaa0015;">
+          <tr>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #ffaa00;">Class</th>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #ffaa00;">Ordered Scores</th>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #00ffcc;">Calculated Median ($Me$)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5A</td><td style="padding: 8px; border: 1px solid #ffaa0066;">6, 7, <strong style="color: #FF00FF;">8</strong>, 8, 9</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">8</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5B</td><td style="padding: 8px; border: 1px solid #ffaa0066;">2, 2, <strong style="color: #FF00FF;">6</strong>, 10, 10</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">6</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5C</td><td style="padding: 8px; border: 1px solid #ffaa0066;">7, 7, <strong style="color: #FF00FF;">7</strong>, 7, 7</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">7</td></tr>
+        </tbody>
+      </table>
+      
+      <h3>Strengths and Weaknesses:</h3>
+      <ul>
+        <li>
+          <strong style="color: #00ffcc;">Strength (Robustness):</strong> The Median is <strong><em>robust to outliers</em></strong>. If the highest score in <strong>Class 5B</strong> was 100 instead of 10, the Median would still be 6. It is the best measure for skewed distributions.
+        </li>
+        <li>
+          <strong style="color: #FF00FF;">Weakness:</strong> It only considers the position of the values, ignoring the <strong><em>magnitude of the scores</em></strong>, which can discard potentially important information about the tails of the distribution.
+        </li>
+      </ul>
+    </div>
+    
+    <div class="post-card">
+      <h2>✨ The Mode ($Mo$) - The Most Frequent Value</h2>
+      <p>
+        The Mode is the value that appears <strong><em>most often</em></strong> in a dataset, i.e., the value with the highest frequency. A distribution can have one mode (<strong><em>unimodal</em></strong>), two modes (<strong><em>bimodal</em></strong>), or no mode at all.
+      </p>
+
+      <h3>Formula:</h3>
+      <p>
+        There is no computational formula for the Mode; it is found by <strong><em>simple observation</em></strong> (counting frequencies).
+      </p>
+
+      <h3>Analysis of Class Scores:</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+        <thead style="background: #ffaa0015;">
+          <tr>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #ffaa00;">Class</th>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #ffaa00;">Scores (Frequencies)</th>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #00ffcc;">Calculated Mode ($Mo$)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5A</td><td style="padding: 8px; border: 1px solid #ffaa0066;">6(1), 7(1), 8(2), 9(1)</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">8</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5B</td><td style="padding: 8px; border: 1px solid #ffaa0066;">2(2), 6(1), 10(2)</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">2 and 10 (Bimodal)</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5C</td><td style="padding: 8px; border: 1px solid #ffaa0066;">7(5)</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">7</td></tr>
+        </tbody>
+      </table>
+      
+      <h3>Strengths and Weaknesses:</h3>
+      <ul>
+        <li>
+          <strong style="color: #00ffcc;">Strength:</strong> It is the <strong><em>only measure applicable to qualitative/nominal data</em></strong> (non-numeric, e.g., favorite color). In <strong>Class 5B</strong>, it correctly highlights the polarization between low and high scores.
+        </li>
+        <li>
+          <strong style="color: #FF00FF;">Weakness:</strong> The Mode may not exist, or a distribution can have multiple modes (as seen in **Class 5B**), making it less useful for uniquely defining the center. It is the <strong><em>least stable measure</em></strong>.
+        </li>
+      </ul>
+    </div>
+
+    <div class="post-card">
+      <h2>🌐 Measures of Dispersion: Variance, Standard Deviation, IQR</h2>
+      <p>
+        Measures of central tendency tell us <strong><em>where the center of the data lies</em></strong>, but they tell us nothing about <strong><em>how spread out the data points are</em></strong>. Measures of dispersion (or variability) quantify the extent to which a distribution is stretched or squeezed.
+      </p>
+      <p>
+        Understanding dispersion is crucial, especially in fields like cybersecurity, where a wide spread in "risk scores" (like in Class 5B) suggests high uncertainty or heterogeneity, even if the average score is moderate. The main measures of dispersion are the **Variance**, the **Standard Deviation**, and the **Interquartile Range (IQR)**.
+      </p>
+      <p>
+        We will now analyze how these measures help differentiate the performance of Classes 5A, 5B, and 5C, which had very similar central tendency measures but visibly different data spreads.
+      </p>
+    </div>
+
+    <div class="post-card">
+      <h2>🔥 The Variance ($\sigma^2$) - Squared Deviation</h2>
+      <p>
+        The Variance measures the <strong><em>average squared difference</em></strong> between each score and the mean ($\bar{x}$). It gives high weight to extreme deviations, indicating how far, on average, the scores are spread from the center.
+      </p>
+
+      <h3>Formula:</h3>
+      <p>
+        The formula for the population variance ($\sigma^2$) is:
+      </p>
+      <p style="text-align: center; font-family: 'Orbitron', sans-serif; font-size: 1.6rem; color: #00ffcc;">
+        $\sigma^2 = \frac{\sum_{i=1}^{n} (x_i - \bar{x})^2}{n}$
+      </p>
+
+      <h3>Analysis of Class Scores:</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+        <thead style="background: #ffaa0015;">
+          <tr>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #ffaa00;">Class</th>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #ffaa00;">Mean ($\bar{x}$)</th>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #00ffcc;">Variance ($\sigma^2$)</th>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #ffaa00;">Interpretation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5A</td><td style="padding: 8px; border: 1px solid #ffaa0066; text-align: center;">7.6</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">1.04</td><td style="padding: 8px; border: 1px solid #ffaa0066;">Low dispersion. Scores are close to the mean.</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5B</td><td style="padding: 8px; border: 1px solid #ffaa0066; text-align: center;">6.0</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">12.8</td><td style="padding: 8px; border: 1px solid #ffaa0066;">Extremely high dispersion, confirming the polarization.</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5C</td><td style="padding: 8px; border: 1px solid #ffaa0066; text-align: center;">7.0</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">0.0</td><td style="padding: 8px; border: 1px solid #ffaa0066;">No dispersion (all scores are identical to the mean).</td></tr>
+        </tbody>
+      </table>
+      
+      <h3>Strengths and Weaknesses:</h3>
+      <ul>
+        <li>
+          <strong style="color: #00ffcc;">Strength:</strong> It provides a clear, quantitative measure of variability and is foundational for many inferential statistics. It amplifies the effect of large deviations.
+        </li>
+        <li>
+          <strong style="color: #FF00FF;">Weakness:</strong> The result ($\sigma^2$) is expressed in <strong><em>units squared</em></strong>, making it difficult to interpret in the original context (1-10 scores). Like the mean, it is <strong><em>highly sensitive to outliers</em></strong> and not robust.
+        </li>
+      </ul>
+    </div>
+
+    <div class="post-card">
+      <h2>⚡ The Standard Deviation ($\sigma$) - Interpretable Dispersion</h2>
+      <p>
+        The Standard Deviation is simply the <strong><em>square root of the Variance</em></strong>. This crucial step brings the measure of dispersion back into the <strong><em>original unit of measurement</em></strong> of the scores, making it directly interpretable in the context of the data (scores from 1 to 10).
+      </p>
+
+      <h3>Formula:</h3>
+      <p>
+        The formula for the population standard deviation ($\sigma$) is:
+      </p>
+      <p style="text-align: center; font-family: 'Orbitron', sans-serif; font-size: 1.6rem; color: #00ffcc;">
+        $\sigma = \sqrt{\frac{\sum_{i=1}^{n} (x_i - \bar{x})^2}{n}} = \sqrt{\sigma^2}$
+      </p>
+
+      <h3>Analysis of Class Scores:</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+        <thead style="background: #ffaa0015;">
+          <tr>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #ffaa00;">Class</th>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #ffaa00;">Mean ($\bar{x}$)</th>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #00ffcc;">Standard Deviation ($\sigma$)</th>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #ffaa00;">Interpretation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5A</td><td style="padding: 8px; border: 1px solid #ffaa0066; text-align: center;">7.6</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">1.02</td><td style="padding: 8px; border: 1px solid #ffaa0066;">Scores deviate by ~1 point from the mean (7.6).</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5B</td><td style="padding: 8px; border: 1px solid #ffaa0066; text-align: center;">6.0</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">3.58</td><td style="padding: 8px; border: 1px solid #ffaa0066;">Scores deviate widely (by ~3.6 points) from the mean (6.0).</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5C</td><td style="padding: 8px; border: 1px solid #ffaa0066; text-align: center;">7.0</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">0.00</td><td style="padding: 8px; border: 1px solid #ffaa0066;">Zero dispersion (perfect consistency).</td></tr>
+        </tbody>
+      </table>
+      
+      <h3>Strengths and Weaknesses:</h3>
+      <ul>
+        <li>
+          <strong style="color: #00ffcc;">Strength:</strong> It provides a clear, interpretable measure of the average spread in the original units. It is the gold standard for normally distributed data.
+        </li>
+        <li>
+          <strong style="color: #FF00FF;">Weakness:</strong> Since it is derived from the Mean, the Standard Deviation is <strong><em>not robust</em></strong>; it is heavily influenced by outliers, which can inflate the value of $\sigma$.
+        </li>
+      </ul>
+    </div>
+
+    <div class="post-card">
+      <h2>📦 The Interquartile Range ($IQR$) - Robust Dispersion</h2>
+      <p>
+        The Interquartile Range (IQR) is the difference between the <strong><em>Third Quartile ($Q_3$)</em></strong> and the <strong><em>First Quartile ($Q_1$)</em></strong>. It measures the spread of the central 50% of the data, ignoring the most extreme scores (the lowest 25% and the highest 25%).
+      </p>
+
+      <h3>Formula:</h3>
+      <p>
+        The formula for the IQR is:
+      </p>
+      <p style="text-align: center; font-family: 'Orbitron', sans-serif; font-size: 1.6rem; color: #00ffcc;">
+        $IQR = Q_3 - Q_1$
+      </p>
+
+      <h3>Analysis of Class Scores:</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+        <thead style="background: #ffaa0015;">
+          <tr>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #ffaa00;">Class</th>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #ffaa00;">$Q_1$ / $Q_3$</th>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #00ffcc;">IQR ($Q_3 - Q_1$)</th>
+            <th style="padding: 10px; border: 1px solid #ffaa0066; color: #ffaa00;">Interpretation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5A</td><td style="padding: 8px; border: 1px solid #ffaa0066; text-align: center;">6.5 / 8.5</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">2.0</td><td style="padding: 8px; border: 1px solid #ffaa0066;">The central 50% of scores span 2 points.</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5B</td><td style="padding: 8px; border: 1px solid #ffaa0066; text-align: center;">2 / 10</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">8.0</td><td style="padding: 8px; border: 1px solid #ffaa0066;">High spread, confirming the central data is also far apart.</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #ffaa0066; color: #ffaa00;">5C</td><td style="padding: 8px; border: 1px solid #ffaa0066; text-align: center;">7 / 7</td><td style="padding: 8px; border: 1px solid #ffaa0066; color: #00ffcc; text-align: center;">0.0</td><td style="padding: 8px; border: 1px solid #ffaa0066;">Zero spread (perfect consistency).</td></tr>
+        </tbody>
+      </table>
+      
+      <h3>Strengths and Weaknesses:</h3>
+      <ul>
+        <li>
+          <strong style="color: #00ffcc;">Strength (Robustness):</strong> The IQR is <strong><em>highly robust</em></strong> as it is based on the median and ignores the extreme 25% tails of the distribution. It is the best measure of dispersion for <strong><em>skewed data</em></strong> or data with significant outliers.
+        </li>
+        <li>
+          <strong style="color: #FF00FF;">Weakness:</strong> It ignores the most extreme scores, potentially missing important information if those outliers are meaningful (e.g., maximum possible system vulnerability).
+        </li>
+      </ul>
+    </div>
+
+    <div class="post-card"> 
+      <a href="index.html" class="back-button">← Back to Index</a>
+    </div>
+
+  </section> <script>
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+// [Il resto dello script del background rimane qui]
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const points = [];
+    const numPoints = 100;
+
+    for (let i = 0; i < numPoints; i++) {
+      points.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: (Math.random() - 0.5) * 0.6
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < points.length; i++) {
+        const p1 = points[i];
+        for (let j = i + 1; j < points.length; j++) {
+          const p2 = points[j];
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 130) {
+            ctx.strokeStyle = `rgba(255, 200, 0, ${(1 - dist / 130) * 0.15})`;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+
+        p1.x += p1.vx;
+        p1.y += p1.vy;
+        if (p1.x < 0 || p1.x > canvas.width) p1.vx *= -1;
+        if (p1.y < 0 || p1.y > canvas.height) p1.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p1.x, p1.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffcc00';
+        ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  </script>
+</body>
+</html>
