@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homework 7 - Random Walk & Binomial Distribution - Gaia Diodati</title>
+  <style>
+    /* CSS Styles (omitted for brevity, assume original styles are here) */
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Rajdhani', sans-serif;
+      color: #fff5cc;
+      background: #050505;
+      overflow-x: hidden;
+    }
+    
+    canvas#bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .hero {
+      min-height: 50vh; 
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 0 4vw;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2.2rem, 8vw, 5rem);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #e6b800;
+      position: relative;
+      text-shadow: 0 0 8px #ffcc00, 0 0 16px #ffaa00, 2px 2px 35px rgba(255,200,0,0.8);
+      animation: glowPulse 4s ease-in-out infinite, glitch 2s infinite;
+      margin: 0 0 12px;
+    }
+
+    h1::before, h1::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      color: #ffaa00;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    h1::before {
+      left: 2px;
+      text-shadow: -2px 0 #ff33cc;
+      animation: glitchShift 2s infinite linear alternate-reverse;
+    }
+
+    h1::after {
+      left: -2px;
+      text-shadow: 2px 0 #00ffcc;
+      animation: glitchShift 3s infinite linear alternate;
+    }
+
+    h2 {
+      font-size: clamp(1.2rem, 4vw, 2rem);
+      color: #ffd966;
+      margin: 6px 0;
+    }
+
+    .subtitle {
+      font-size: clamp(0.9rem, 3vw, 1rem);
+      color: #fff3cc;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+    
+    @keyframes glitchShift {
+      0% { clip-path: inset(0 0 90% 0); }
+      20% { clip-path: inset(10% 0 70% 0); }
+      40% { clip-path: inset(40% 0 30% 0); }
+      60% { clip-path: inset(60% 0 10% 0); }
+      80% { clip-path: inset(80% 0 0 0); }
+      100% { clip-path: inset(0 0 100% 0); }
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { text-shadow: 0 0 8px #ffcc00, 0 0 20px #ffaa00, 0 0 40px #ffcc33; }
+      50% { text-shadow: 0 0 15px #ffee88, 0 0 35px #ffaa00, 0 0 60px #ffd966; }
+    }
+
+    @keyframes glitch {
+      0%, 100% { transform: none; }
+      92% { transform: translate(-1px, 1px) skew(0.3deg); }
+      94% { transform: translate(1px, -1px) skew(-0.3deg); }
+      96% { transform: translate(-2px, 1px) skew(0.5deg); }
+      98% { transform: translate(2px, -1px) skew(-0.5deg); }
+    }
+
+
+    /* Stili per il contenuto */
+    .content-section {
+        padding: 50px 5vw 70px;
+        background: rgba(20, 20, 20, 0.8);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .post-card {
+        width: 90%;
+        max-width: 900px; 
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 200, 0, 0.3);
+        border-radius: 12px;
+        padding: 22px;
+        text-align: left;
+        backdrop-filter: blur(6px);
+        margin-bottom: 25px;
+    }
+    
+    .post-card h3 {
+        font-family: 'Orbitron', sans-serif;
+        color: #ffd966;
+        margin-top: 25px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid rgba(255, 200, 0, 0.2);
+        padding-bottom: 5px;
+        font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+    }
+    .post-card p {
+        color: #fff3cc;
+        font-size: clamp(0.9rem, 2.8vw, 1rem);
+        line-height: 1.6;
+        margin-bottom: 15px;
+    }
+
+    /* Stili form e input */
+    .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 20px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .controls label {
+        display: block;
+        color: #00ffcc;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+
+    .controls input[type="number"], .controls input[type="text"] {
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid #ffaa00;
+        color: #fff;
+        padding: 8px;
+        border-radius: 4px;
+        width: 100px;
+        font-family: 'Rajdhani', sans-serif;
+    }
+    
+    /* Stile per il pulsante di simulazione */
+    #runSimulation {
+        background: #ffaa00; 
+        color: #000;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 999px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        font-family: 'Orbitron', sans-serif;
+        transition: all 0.3s ease;
+    }
+    #runSimulation:hover {
+        background: #ffd966;
+        box-shadow: 0 0 10px #ffaa00;
+    }
+    
+    /* Contenitore Grafici */
+    .chart-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        gap: 20px;
+        margin-top: 30px;
+    }
+    .chart-box {
+        width: 100%;
+        max-width: 450px;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #00ffcc55;
+    }
+    #statsOutput {
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid #ffaa00;
+        padding: 10px;
+        margin-top: 15px;
+        white-space: pre-wrap;
+        color: #b6ffb6;
+        min-height: 50px;
+        font-family: monospace;
+    }
+
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+
+  <div class="hero">
+    <h1 data-text="Homework 8">Homework 8</h1>
+    <h2>Random Walk and Binomial Convergence</h2>
+    <p class="subtitle">Gaia Diodati – Statistics Course</p>
+  </div>
+
+  <section class="content-section">
+    <div class="post-card">
+      <h2>🎲 Simulation: Server Security Score</h2>
+      <p>
+        The simulation tracks the evolution of a server's security score over <b><i>n</i></b> weeks, establishing a parallel with the <b><i>Random Walk</i></b>. Each week is a step: +1 if the server is secure, -1 if it is breached by <b><i>m</i></b> attackers with probability <b><i>p</i></b>. The final score distribution (over <b><i>m</i></b> trajectories) converges to the <b><i>Binomial Distribution</i></b> for large <b><i>n</i></b> and <b><i>m</i></b>.
+      </p>
+
+      <h3>Simulation Parameters</h3>
+      <div class="controls">
+        <div>
+          <label for="n_weeks">Weeks (n):</label>
+          <input type="number" id="n_weeks" value="50" min="10" max="500">
+        </div>
+        <div>
+          <label for="m_attackers">Trajectories (m):</label>
+          <input type="number" id="m_attackers" value="1000" min="100" max="100000">
+        </div>
+        <div>
+          <label for="p_breach">P(single breach p):</label>
+          <input type="number" id="p_breach" value="0.05" step="0.001" min="0.001" max="0.5">
+        </div>
+        <button id="runSimulation" onclick="runSimulation()">Run Simulation</button>
+      </div>
+
+      <div id="statsOutput">
+        Current Parameters: n=50, m=1000, p=0.05. <br>
+        Server security probability (p_rw): calculation in progress...
+      </div>
+      
+      <h3>Visualization</h3>
+      <div class="chart-container">
+        <div class="chart-box">
+          <canvas id="randomWalkChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <canvas id="binomialDistributionChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Chart initialization variables
+    let rwChart = null;
+    let binomialChart = null;
+
+    // Helper function to calculate the binomial PMF (theoretical frequency)
+    function binomialPMF(k, n, p) {
+        // Calculate C(n, k) = n! / (k! * (n-k)!)
+        function combinations(n, k) {
+            if (k < 0 || k > n) return 0;
+            if (k === 0 || k === n) return 1;
+            if (k > n / 2) k = n - k;
+            
+            let res = 1;
+            for (let i = 1; i <= k; i++) {
+                res = res * (n - i + 1) / i;
+            }
+            return res;
+        }
+        
+        // PMF = C(n, k) * p^k * (1-p)^(n-k)
+        return combinations(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
+    }
+    
+    // Main simulation function
+    function runSimulation() {
+        // --- 1. Retrieve Parameters ---
+        const n_weeks = parseInt(document.getElementById('n_weeks').value); // n
+        const n_trajectories = parseInt(document.getElementById('m_attackers').value); // m
+        const p_breach_single = parseFloat(document.getElementById('p_breach').value); // p
+
+        if (n_weeks <= 0 || n_trajectories <= 0 || p_breach_single <= 0 || p_breach_single > 1) {
+            alert("Please enter valid parameters.");
+            return;
+        }
+
+        // --- 2. Calculate Composite Probability ---
+        // P(Server Secure) = (1 - p_breach_single) ^ n_trajectories 
+        const p_secure_rw = Math.pow(1 - p_breach_single, n_trajectories); 
+        const q_breach_rw = 1 - p_secure_rw; // P(Server Breached)
+
+        document.getElementById('statsOutput').innerHTML = 
+            `Parameters: n=${n_weeks}, m=${n_trajectories}, p=${p_breach_single}\n` +
+            `P(Server Secure | m attackers) [p_rw]: ${p_secure_rw.toFixed(6)}\n` +
+            `P(Server Breached) [q_rw]: ${q_breach_rw.toFixed(6)}`;
+
+        // --- 3. Random Walk Simulation ---
+        const finalScoresMap = new Map();
+        const trajectories = [];
+        
+        // Simulate n_trajectories (m) walks
+        for (let i = 0; i < n_trajectories; i++) {
+            let currentScore = 0;
+            let trajectory = [0]; 
+            
+            // Each walk lasts n_weeks (n) steps
+            for (let week = 0; week < n_weeks; week++) {
+                const rand = Math.random();
+                
+                // If rand < p_secure_rw, Success (+1: Secure)
+                if (rand < p_secure_rw) {
+                    currentScore += 1;
+                } else {
+                    // Otherwise, Failure (-1: Breached)
+                    currentScore -= 1;
+                }
+                trajectory.push(currentScore);
+            }
+            
+            // Record the final score
+            finalScoresMap.set(currentScore, (finalScoresMap.get(currentScore) || 0) + 1);
+            
+            // Record only a small sample of trajectories for the chart (e.g., first 20)
+            if (i < 20) { 
+                trajectories.push(trajectory);
+            }
+        }
+
+        // --- 4. Distribution Data Preparation ---
+        const simulatedScores = Array.from(finalScoresMap.keys()).sort((a, b) => a - b);
+        const simulatedCounts = simulatedScores.map(score => finalScoresMap.get(score));
+
+        const theoreticalCounts = [];
+        for (let k = 0; k <= n_weeks; k++) {
+            const score = 2 * k - n_weeks; // S = 2k - n
+            const probability = binomialPMF(k, n_weeks, p_secure_rw);
+            theoreticalCounts.push({x: score, y: probability * n_trajectories});
+        }
+
+        // --- 5. Chart Rendering ---
+        renderRandomWalkChart(n_weeks, trajectories);
+        renderBinomialChart(simulatedScores, simulatedCounts, theoreticalCounts);
+    }
+
+    // Function to draw the Random Walk chart
+    function renderRandomWalkChart(n_weeks, trajectories) {
+        const ctx = document.getElementById('randomWalkChart').getContext('2d');
+        if (rwChart) rwChart.destroy();
+        
+        const datasets = trajectories.map((trajectory, index) => ({
+            label: `Trajectory ${index + 1}`,
+            data: trajectory,
+            borderColor: getRandomColor(),
+            borderWidth: 1,
+            fill: false,
+            pointRadius: 0
+        }));
+
+        rwChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: n_weeks + 1}, (_, i) => i),
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: { display: true, text: `Random Walk: Cumulative Scores (${trajectories.length} Trajectories)`, color: '#ffd966' },
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Week (n)', color: '#ffcc00' }, grid: { color: 'rgba(255, 204, 0, 0.1)' }, ticks: { color: '#fff3cc' } },
+                    y: { title: { display: true, text: 'Cumulative Score', color: '#00ffcc' }, grid: { color: 'rgba(0, 255, 204, 0.1)' }, ticks: { color: '#fff3cc' } }
+                }
+            }
+        });
+    }
+
+    // Function to draw the Binomial chart
+    function renderBinomialChart(simulatedScores, simulatedCounts, theoreticalCounts) {
+        const ctx = document.getElementById('binomialDistributionChart').getContext('2d');
+        if (binomialChart) binomialChart.destroy();
+
+        const simulatedData = simulatedScores.map((score, index) => ({
+            x: score,
+            y: simulatedCounts[index]
+        }));
+        
+        binomialChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                datasets: [
+                    {
+                        label: 'Simulation (Observed Counts)',
+                        data: simulatedData,
+                        backgroundColor: 'rgba(0, 255, 204, 0.7)', // Cyan
+                        barPercentage: 1.0, 
+                        categoryPercentage: 1.0 
+                    },
+                    {
+                        label: 'Theoretical Binomial',
+                        data: theoreticalCounts,
+                        type: 'line',
+                        borderColor: '#ffaa00', // Orange
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: { display: true, text: 'Final Score Distribution vs. Theoretical Binomial', color: '#ffd966' },
+                    legend: { labels: { color: '#fff3cc' } }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        title: { display: true, text: 'Final Score (S = 2k - n)', color: '#ffcc00' },
+                        grid: { color: 'rgba(255, 204, 0, 0.1)' },
+                        ticks: { color: '#fff3cc' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Frequency (Trajectory Count)', color: '#00ffcc' },
+                        grid: { color: 'rgba(0, 255, 204, 0.1)' },
+                        ticks: { color: '#fff3cc' }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Function to generate random colors for trajectories
+    function getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    // --- CANVAS BACKGROUND SCRIPT ---
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+
+    const points = [];
+    const numPoints = 100;
+
+    function initPoints() {
+      // Re-initialize points to distribute them uniformly
+      points.length = 0; 
+      for (let i = 0; i < numPoints; i++) {
+        points.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          vx: (Math.random() - 0.5) * 0.6,
+          vy: (Math.random() - 0.5) * 0.6
+        });
+      }
+    }
+
+    function resizeCanvas() {
+      // Set canvas dimensions for the drawing context
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      initPoints(); // Re-initialize points whenever dimensions change
+    }
+    
+    // Initialization and resize handling
+    resizeCanvas(); 
+    window.addEventListener('resize', resizeCanvas);
+
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < points.length; i++) {
+        const p1 = points[i];
+        for (let j = i + 1; j < points.length; j++) {
+          const p2 = points[j];
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 130) {
+            ctx.strokeStyle = `rgba(255, 200, 0, ${(1 - dist / 130) * 0.15})`;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+
+        p1.x += p1.vx;
+        p1.y += p1.vy;
+        
+        // Boundaries: reverse direction when hitting a boundary
+        if (p1.x < 0 || p1.x > canvas.width) p1.vx *= -1;
+        if (p1.y < 0 || p1.y > canvas.height) p1.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p1.x, p1.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffcc00';
+        ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+    
+    // Run simulation on initial load
+    document.addEventListener('DOMContentLoaded', runSimulation);
+
+  </script>
+</body>
+</html>
